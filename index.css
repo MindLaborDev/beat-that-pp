@@ -1,4 +1,3 @@
-
 .progress > div {
     width: 100%;
     height: 3px;
@@ -12,4 +11,22 @@
     border-radius: 2px;
     background-color: var(--cirrus-primary);
     transition: width 0.3s;
+}
+
+.top-element {
+    padding-top: 25vh;
+    width: 50%;
+    margin: auto;
+    transition: padding-top 0.3s;
+}
+
+.goup {
+    padding-top: 10vh;
+}
+
+.truncate {
+    width: 420px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

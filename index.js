@@ -12,7 +12,7 @@ $(document).ready(function () {
         const username = $("#username").val().trim();
         const playerUrl = `https://new.scoresaber.com/api/players/by-name/${username}`;
         
-        $.get(playerUrl, function(data, status) 
+        $.get(playerUrl, async function(data, status) 
         {
             if (status !== "success") 
                 return;
@@ -21,7 +21,20 @@ $(document).ready(function () {
                 return;
 
             const player = data.players[0];
-            const finalData = fetchUserData(player.playerId);
+            const finalData = await fetchUserData(player.playerId);
+            console.log(finalData);
+
+            $(".top-element").addClass("goup");
+            const songsWrapper = $("#songs");
+            for (const song of finalData.songs) {
+                const html = generateSongTile({
+                    cover:          `https://new.scoresaber.com/api/static/covers/${song.hash}.png`,
+                    title:          song.name,
+                    description:    song.description,
+                    oneclick:       `beatsaver://${song.key}`
+                });
+                songsWrapper.append(html);
+            }
 
         });
 
@@ -90,8 +103,6 @@ function fetchUserData(userId) {
             } while (page <= maxPages && pageSongs.length === 8);
 
             setStatus("Done!");
-
-            console.log("Final Data", player);
             resolve(player);
         });
     });
@@ -111,7 +122,6 @@ function fetchUserSongPage(page) {
             const songs = [];
             for (const score of data.scores) {
                 if (score.weight < WEIGHT_THRESHOLD) {
-
                     break;
                 }
 
@@ -120,8 +130,6 @@ function fetchUserSongPage(page) {
                     songs.push(songsTable[score.songHash]);
                     continue;
                 }
-                
-                //console.log("difficulty", score.difficulty, score.difficultyRaw);
 
                 songs.push(
                     await fetchSongData({
@@ -173,4 +181,21 @@ function fetchSongData(song, songHash, difficulty) {
             resolve(song);
         });
     });
+}
+
+function generateSongTile(data) {
+    return `
+    <div class="tile my-2">
+        <div class="tile__icon">
+            <figure class="avatar"><img src="${data.cover}" /></figure>
+        </div>
+        <div class="tile__container">
+            <p class="tile__title m-0 truncate">${data.title}</p>
+            <p class="tile__subtitle m-0 truncate">${data.description}</p>
+        </div>
+        <div class="tile__buttons m-0">
+            <a href="${data.oneclick}"><button class="btn-primary btn-small uppercase">Install</button></a>
+        </div>
+    </div>
+    `;
 }
