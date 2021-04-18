@@ -36,6 +36,7 @@ $(document).ready(function () {
 
 })
 
+const songsTable = {};
 const WEIGHT_THRESHOLD = 0.6;
 const STEPS = 3;
 let step = 0;
@@ -48,7 +49,7 @@ function setStatus(message) {
     step++;
     $("#progress").css("width", ~~(step/STEPS*100) + "%")
     $("#progress-status").text(~~(step/STEPS*100) + "%");
-    $("#progress-message").text(message + ` (${step}/${STEPS})`);
+    $("#progress-message").text(message + `... (${step}/${STEPS})`);
 
     if (~~(step/STEPS*100) === 100) {
         $("#generate-playlist").removeClass("loading hide-text");
@@ -113,8 +114,15 @@ function fetchUserSongPage(page) {
 
                     break;
                 }
+
+                // Check if we already have the song
+                if (songsTable[score.songHash]) {
+                    songs.push(songsTable[score.songHash]);
+                    continue;
+                }
                 
-                console.log("difficulty", score.difficulty, score.difficultyRaw);
+                //console.log("difficulty", score.difficulty, score.difficultyRaw);
+
                 songs.push(
                     await fetchSongData({
                         pp:         score.pp,
