@@ -185,7 +185,7 @@ function fetchSongData(song, songHash, difficulty) {
 
 function generateSongTile(data) {
     return `
-    <div class="tile my-2">
+    <div class="tile my-2 hover-grow">
         <div class="tile__icon">
             <figure class="avatar"><img src="${data.cover}" /></figure>
         </div>

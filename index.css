@@ -30,3 +30,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.hover-grow:hover {
+    transform: scale(1.03);
+}
