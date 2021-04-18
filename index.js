@@ -39,7 +39,8 @@ $(document).ready(function () {
                     njs: song.njs,
                     njsOffset: round(song.njsOffset),
                     zip: song.zip,
-                    key: song.key
+                    key: song.key,
+                    nps: round(song.notes / song.length) 
                 });
                 songsWrapper.append(html);
             }
@@ -214,10 +215,11 @@ function generateSongTile(data) {
     };
 
     return `
-    <div class="tile my-2 hover-grow">
+    <div class="tile my-4 hover-grow">
         <div class="tile__icon mr-2">
             <figure class="avatar"><img src="${data.cover}" /></figure>
-            <div class="tag tag--link">${round(data.pp)}pp</div><br />
+            <div class="tag tag--link mt-1">${round(data.pp)}pp</div><br />
+            <div class="tag tag--link">${~~(data.duration / 60)}m ${data.duration % 60}s</div><br />
         </div>
         <div class="tile__container">
             <p class="tile__title m-0 truncate">${data.title}</p>
@@ -226,10 +228,10 @@ function generateSongTile(data) {
                     <div class="tag tag--${difficulties[data.difficulty]["color"]}">${difficulties[data.difficulty]["display"]}</div>
                     <div class="tag tag--${difficulties[data.difficulty]["color"]} ml-1">${data.accuracy}%</div><br />
                 </span>
-                <span><b class="info-category">Duration:</b> ${~~(data.duration / 60)}m ${data.duration % 60}s<br /></span>
-                <span>${data.njs ? `<b class="info-category">Njs:</b> ${data.njs}<br />` : ``}</span>
-                <span>${data.njsOffset ? `<b class="info-category">Offset:</b> ${data.njsOffset}<br />` : ``}</span>
-                <span class="tooltip" data-tooltip=""><b class="info-category">Weight:</b> ${round(data.weight * 100)}%<br /></span>
+                <span class="tooltip tooltip--right" data-tooltip="Average Notes per second">${data.nps ? `<b class="info-category">NPS:</b> ${data.nps}` : ``}</span>${data.nps ? `<br />` : ``}
+                <span class="tooltip tooltip--right" data-tooltip="Note Jump Speed">${data.njs ? `<b class="info-category">NJS:</b> ${data.njs}` : ``}</span>${data.njs ? `<br />` : ``}
+                <span class="tooltip tooltip--right" data-tooltip="Note Jump Offset">${data.njsOffset ? `<b class="info-category">Offset:</b> ${data.njsOffset}` : ``}</span>${data.njsOffset ? `<br />` : ``}
+                <span class="tooltip tooltip--right" data-tooltip="PP Weight"><b class="info-category">Weight:</b> ${round(data.weight * 100)}%<br /></span>
             </p>
         </div>
         <div class="tile__buttons m-0">
