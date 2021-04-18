@@ -229,9 +229,9 @@ function generateSongTile(data) {
                     <div class="tag tag--${difficulties[data.difficulty]["color"]} mb-2">${difficulties[data.difficulty]["display"]}</div>
                     <div class="tag tag--${difficulties[data.difficulty]["color"]} ml-1 mb-2 tooltip tooltip--right" data-tooltip="Accuracy">${data.accuracy}%</div><br />
                 </span>
-                <span class="tooltip tooltip--right" data-tooltip="Average Notes per second">${data.nps ? `<b class="info-category">NPS:</b> ${data.nps}` : ``}</span>${data.nps ? `<br />` : ``}
-                <span class="tooltip tooltip--right" data-tooltip="Note Jump Speed">${data.njs ? `<b class="info-category">NJS:</b> ${data.njs}` : ``}</span>${data.njs ? `<br />` : ``}
-                <span class="tooltip tooltip--right" data-tooltip="Note Jump Offset">${data.njsOffset ? `<b class="info-category">Offset:</b> ${data.njsOffset}` : ``}</span>${data.njsOffset ? `<br />` : ``}
+                <span class="tooltip tooltip--right" data-tooltip="Average Notes per second">${data.nps ? `<b class="info-category">NPS:</b>${data.nps}` : ``}</span>${data.nps ? `<br />` : ``}
+                <span class="tooltip tooltip--right" data-tooltip="Note Jump Speed">${data.njs ? `<b class="info-category">NJS:</b>${data.njs}` : ``}</span>${data.njs ? `<br />` : ``}
+                <span class="tooltip tooltip--right" data-tooltip="Note Jump Offset">${data.njsOffset ? `<b class="info-category">Offset:</b>${data.njsOffset}` : ``}</span>${data.njsOffset ? `<br />` : ``}
                 <span><b class="info-category">Weighted PP:</b>${round(data.weightedPP)} (${round(data.weight * 100)}%)<br /></span>
             </p>
         </div>
