@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beat that PP</title>
 
-    <link rel="stylesheet" href="https://unpkg.com/cirrus-ui">
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/cirrus-ui">
+    <link rel="stylesheet" type="text/css" href="index.css">
 </head>
 <body class="u-center">
 
@@ -16,10 +17,16 @@
             <p>Increase your BeatSaber pp score with custom song recommendations that fits your level and play style. <br> Just enter your Scoresaber username below and you're ready to rock!</p>
         </div>
         <label>Scoresaber Username</label>
-        <input type="text" placeholder="" required />
-        <button class="btn-primary mt-2">GENERATE PLAYLIST</button>
+        <input id="username" type="text" />
+        <button id="generate-playlist" class="btn-primary animated mt-2">GENERATE PLAYLIST</button>
+        <div class="progress u-none">
+            <label id="progress-message"></label>
+            <div class="light"><div id="progress" class="primary"></div></div>
+            <span id="progress-status"></span>
+        </div>
     </div>
     
+    <script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script>
     <script src="index.js"></script>
 </body>
 </html>
