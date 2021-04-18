@@ -32,5 +32,10 @@
 }
 
 .hover-grow:hover {
-    transform: scale(1.03);
+    transform: scale(1.01);
+}
+
+.info-category {
+    display: inline-block;
+    width: 6rem;
 }
