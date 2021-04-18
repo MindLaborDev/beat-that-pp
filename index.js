@@ -35,6 +35,7 @@ $(document).ready(function () {
                     duration: Math.round(song.length),
                     pp: song.pp,
                     weight: song.weight,
+                    weightedPP: song.weightedPP,
                     accuracy: song.accuracy,
                     njs: song.njs,
                     njsOffset: round(song.njsOffset),
@@ -219,24 +220,24 @@ function generateSongTile(data) {
         <div class="tile__icon mr-2">
             <figure class="avatar"><img src="${data.cover}" /></figure>
             <div class="tag tag--link mt-1">${round(data.pp)}pp</div><br />
-            <div class="tag tag--link">${~~(data.duration / 60)}m ${data.duration % 60}s</div><br />
+            <div class="tag tag--white">${~~(data.duration / 60)}m ${data.duration % 60}s</div><br />
         </div>
         <div class="tile__container">
             <p class="tile__title m-0 truncate">${data.title}</p>
             <p class="tile__subtitle m-0 truncate">
                 <span>
-                    <div class="tag tag--${difficulties[data.difficulty]["color"]}">${difficulties[data.difficulty]["display"]}</div>
-                    <div class="tag tag--${difficulties[data.difficulty]["color"]} ml-1">${data.accuracy}%</div><br />
+                    <div class="tag tag--${difficulties[data.difficulty]["color"]} mb-2">${difficulties[data.difficulty]["display"]}</div>
+                    <div class="tag tag--${difficulties[data.difficulty]["color"]} ml-1 mb-2 tooltip tooltip--right" data-tooltip="Accuracy">${data.accuracy}%</div><br />
                 </span>
                 <span class="tooltip tooltip--right" data-tooltip="Average Notes per second">${data.nps ? `<b class="info-category">NPS:</b> ${data.nps}` : ``}</span>${data.nps ? `<br />` : ``}
                 <span class="tooltip tooltip--right" data-tooltip="Note Jump Speed">${data.njs ? `<b class="info-category">NJS:</b> ${data.njs}` : ``}</span>${data.njs ? `<br />` : ``}
                 <span class="tooltip tooltip--right" data-tooltip="Note Jump Offset">${data.njsOffset ? `<b class="info-category">Offset:</b> ${data.njsOffset}` : ``}</span>${data.njsOffset ? `<br />` : ``}
-                <span class="tooltip tooltip--right" data-tooltip="PP Weight"><b class="info-category">Weight:</b> ${round(data.weight * 100)}%<br /></span>
+                <span><b class="info-category">Weighted PP:</b>${round(data.weightedPP)} (${round(data.weight * 100)}%)<br /></span>
             </p>
         </div>
         <div class="tile__buttons m-0">
+            <button class="js-listen btn-small" data-key="${data.key}" onclick="listen(this, 'https://beatsaver.com${data.zip}')">listen</button>
             <a href="${data.oneclick}"><button class="btn-primary btn-small uppercase">Install</button></a>
-            <button class="js-listen" data-key="${data.key}" onclick="listen(this, 'https://beatsaver.com${data.zip}')">listen</button>
         </div>
     </div>
     `;
@@ -279,7 +280,7 @@ let audio = new Audio;
 let playing = false;
 let playingSong = "";
 let fetching = false;
-audio.volume = .25;
+audio.volume = .1;
 let previewSong = (() => {
     let e = async (e, t) => {
         let n = URL.createObjectURL(e)

@@ -37,5 +37,10 @@
 
 .info-category {
     display: inline-block;
-    width: 6rem;
+    width: 8rem;
+}
+
+.avatar {
+    width: 4.2rem;
+    height: 4.2rem;
 }
