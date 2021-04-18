@@ -97,7 +97,7 @@ function fetchUserData(userId) {
             let page = 1;
             let pageSongs;
             do {
-                pageSongs = await fetchUserSongPage(page);
+                pageSongs = await fetchUserSongPage(userId, page);
                 player.songs = player.songs.concat(pageSongs);
                 page++;
             } while (page <= maxPages && pageSongs.length === 8);
@@ -112,9 +112,9 @@ function fetchUserData(userId) {
 /**
  * Fetch songs from a scoresaber song page
  */
-function fetchUserSongPage(page) {
+function fetchUserSongPage(playerId, page) {
     return new Promise(resolve => {
-        $.get(`https://new.scoresaber.com/api/player/76561198436848521/scores/top/${page}`, async function(data, status) 
+        $.get(`https://new.scoresaber.com/api/player/${playerId}/scores/top/${page}`, async function(data, status) 
         {
             if (status !== "success") 
                 return;
