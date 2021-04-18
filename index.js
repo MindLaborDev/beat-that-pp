@@ -38,6 +38,8 @@ $(document).ready(function () {
                     accuracy: song.accuracy,
                     njs: song.njs,
                     njsOffset: round(song.njsOffset),
+                    zip: song.zip,
+                    key: song.key
                 });
                 songsWrapper.append(html);
             }
@@ -49,7 +51,7 @@ $(document).ready(function () {
 })
 
 const songsTable = {};
-const WEIGHT_THRESHOLD = 0.6;
+const WEIGHT_THRESHOLD = 0.85;
 const STEPS = 3;
 let step = 0;
 
@@ -232,7 +234,7 @@ function generateSongTile(data) {
         </div>
         <div class="tile__buttons m-0">
             <a href="${data.oneclick}"><button class="btn-primary btn-small uppercase">Install</button></a>
-            <button onclick="previewSong(this, 'https://beatsaver.com/cdn/${data.key}/247e7cd970f32fafd9a14de4904ee20ef19ea745.zip')">listen</button>
+            <button class="js-listen" data-key="${data.key}" onclick="listen(this, 'https://beatsaver.com${data.zip}')">listen</button>
         </div>
     </div>
     `;
@@ -242,18 +244,46 @@ function round(number) {
     return ~~(number * 100) / 100;
 }
 
+function listen(me, url) {
+
+    // If programm fetches the song don't iterrupt anything
+    if (fetching) 
+        return;
+
+    const amIPlaying = $(me).attr("data-key") === playingSong;
+
+    // If the button that has been click was playing: Stop the song
+    if (amIPlaying) {
+        songFinished(me);
+    }
+
+    // If user clicked on another button wihtout stopping the last one
+    if (playing && !amIPlaying) {
+        songFinished();
+        previewSong(me, url);
+    }
+
+    // If nothing is playing, just start the song
+    if (!playing) {
+        previewSong(me, url);
+    }
+}
+
 
 /**
  * Snagged from beastsaber.com
  */
 let audio = new Audio;
-audio.volume = .3;
+let playing = false;
+let playingSong = "";
+let fetching = false;
+audio.volume = .25;
 let previewSong = (() => {
-    let e = (e, t) => {
-        let n = URL.createObjectURL(e);
-        audio.src = n,
-            audio.currentTime = t,
-            audio.play()
+    let e = async (e, t) => {
+        let n = URL.createObjectURL(e)
+        audio.src = n
+        audio.currentTime = t
+        await audio.play()
     }
     let t = async t => {
         t.endsWith(".audica") && (t = `https://bsaber-cors-anywhere.herokuapp.com/${t}`);
@@ -280,7 +310,7 @@ let previewSong = (() => {
                     type: "application/ogg"
                 })
                 let d = a.previewStartSeconds;
-                e(l, d)
+                await e(l, d)
             }
             )(o) : (async t => {
                 let n = t.file("info.dat") || t.file("Info.dat")
@@ -289,22 +319,28 @@ let previewSong = (() => {
                 let r = o._songFilename
                 let i = await t.file(r).async("blob")
                 let s = o._previewStartTime;
-                e(i, s)
+                await e(i, s)
             }
             )(o)
         }
     }
-        ;
+
     return async (e, n) => {
-        if (audio.pause(),
-            "playing" == e.dataset.state)
+        if (audio.pause(), "playing" == e.dataset.state)
             e.dataset.state = "";
         else {
             for (const e of document.querySelectorAll(".js-listen"))
                 e.dataset.state = "";
-            e.dataset.state = "loading",
-                t(n),
-                e.dataset.state = "playing"
+
+            fetching = true
+            e.dataset.state = "loading"
+            $(e).addClass("animated loading hide-text");
+            t(n).then(() => {
+
+                // Add finished event listener
+                audio.addEventListener("ended", () => songFinished(e));
+                songStarted(e);
+            })
         }
     }
 }
@@ -312,3 +348,24 @@ let previewSong = (() => {
 /**
  * Snagged from beastsaber.com
  */
+
+
+function songStarted(e) {
+    $(e).text("Stop");
+    $(e).removeClass("animated loading hide-text");
+
+    e.dataset.state = "playing";
+    playing = true;
+    playingSong = $(e).attr("data-key");
+    fetching = false;
+}
+
+function songFinished() {
+    audio.pause();
+    audio.currentTime = 0;
+    $(".js-listen").text("Listen");
+
+    playing = false;
+    playingSong = "";
+    fetching = false;
+}
