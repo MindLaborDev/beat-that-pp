@@ -42,7 +42,7 @@ async function buildRenderingData(player, scores) {
         songData.durationSec = song.length % 60;
         songData.color = difficulties[difficultiesMap[song.difficulty]]["color"];
         songData.difficultyDisplay = difficulties[difficultiesMap[song.difficulty]]["display"];
-        songData.accuracy = round(score.score / score.maxScore) * 100;
+        songData.accuracy = round(score.score * 100 / score.maxScore);
         songData.weightedPP = round(score.weight * score.pp);
         songData.weightDisplay = round(score.weight * 100);
         songData.oneclick = `beatsaver://${songData.key}`;
@@ -66,14 +66,13 @@ function renderSongs(songs) {
     }
 }
 
+
 /**
  * Generates the html and shows it
  */
 function renderPlayer(user) {
-
+    
 }
-
-
 
 
 /**
