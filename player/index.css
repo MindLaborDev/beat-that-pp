@@ -1,0 +1,45 @@
+.progress > div {
+    width: 100%;
+    height: 3px;
+    border-radius: 2px;
+    background-color: var(--cirrus-light);
+}
+
+.progress > div > div {
+    width: 0%;
+    height: 3px;
+    border-radius: 2px;
+    background-color: var(--cirrus-primary);
+    transition: width 0.3s;
+}
+
+.top-element {
+    width: 50%;
+    margin: auto;
+    transition: padding-top 0.3s;
+}
+
+.goup {
+    padding-top: 10vh;
+}
+
+.truncate {
+    width: 420px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hover-grow:hover {
+    transform: scale(1.01);
+}
+
+.info-category {
+    display: inline-block;
+    width: 8rem;
+}
+
+.avatar {
+    width: 4.2rem;
+    height: 4.2rem;
+}
