@@ -43,3 +43,9 @@
     width: 4.2rem;
     height: 4.2rem;
 }
+
+#song-data-table > div {
+    height: 1.35rem;
+    width: fit-content;
+    max-width: 420px;
+}

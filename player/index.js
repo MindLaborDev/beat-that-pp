@@ -42,6 +42,9 @@ async function buildRenderingData(player, scores) {
         setStatus(`Fetching song data (${+i+1} of 8)`);
         const song = await API.getSongData(score.songHash, score.difficulty);
         const songData = Object.assign(song, score);
+        console.log("score", songData);
+
+        songData.author = songData.levelAuthorName;
         songData.pp = round(songData.pp);
         songData.njsOffset = round(songData.njsOffset);
         songData.durationMin = ~~(song.length / 60);
@@ -103,25 +106,32 @@ function generateSongTile(song) {
         <div class="tile__icon mr-2">
             <figure class="avatar"><img src="${song.cover}" /></figure>
             <div class="tag tag--link mt-1">${song.pp}pp</div><br />
-            <div class="tag tag--white">${song.durationMin}m ${song.durationSec}s</div><br />
+            <div class="tag">${song.durationMin}m ${song.durationSec}s</div><br />
         </div>
         <div class="tile__container">
-            <p class="tile__title m-0 truncate">${song.name}</p>
+            <lead class="tile__title m-0 truncate font-bold">${song.name}</lead>
             <p class="tile__subtitle m-0 truncate">
                 <span>
                     <div class="tag tag--${song.color} mb-2">${song.difficultyDisplay}</div>
                     <div class="tag tag--${song.color} ml-1 mb-2 tooltip tooltip--right" data-tooltip="Accuracy">${song.accuracy}%</div><br />
                 </span>
-                <span class="tooltip tooltip--right" data-tooltip="Average Notes per second">
-                    ${song.nps ? `<b class="info-category">NPS:</b>${song.nps}` : ``}
-                </span>${song.nps ? `<br />` : ``}
-                <span class="tooltip tooltip--right" data-tooltip="Note Jump Speed">
-                    ${song.njs ? `<b class="info-category">NJS:</b>${song.njs}` : ``}
-                </span>${song.njs ? `<br />` : ``}
-                <span class="tooltip tooltip--right" data-tooltip="Note Jump Offset">
-                    ${song.njsOffset ? `<b class="info-category">Offset:</b>${song.njsOffset}` : ``}
-                </span>${song.njsOffset ? `<br />` : ``}
-                <span><b class="info-category">Weighted PP:</b>${song.weightedPP} (${song.weightDisplay}%)<br /></span>
+                <div id="song-data-table" class="col">
+                    <div class="tooltip tooltip--right truncate" data-tooltip="Authors username">
+                        ${song.author ? `<b class="info-category font-semibold">Mapper:</b>${song.author}` : ``}
+                    </div>
+                    <div class="tooltip tooltip--right truncate" data-tooltip="Average Notes per second">
+                        ${song.nps ? `<b class="info-category font-semibold">NPS:</b>${song.nps}` : ``}
+                    </div>
+                    <div class="tooltip tooltip--right truncate" data-tooltip="Note Jump Speed">
+                        ${song.njs ? `<b class="info-category font-semibold">NJS:</b>${song.njs}` : ``}
+                    </div>
+                    <div class="tooltip tooltip--right truncate" data-tooltip="Note Jump Offset">
+                        ${song.njsOffset ? `<b class="info-category font-semibold">Offset:</b>${song.njsOffset}` : ``}
+                    </div>
+                    <div>
+                        <b class="info-category font-semibold">Weighted PP:</b>${song.weightedPP} <small class="tag tag--white">(${song.weightDisplay}%)</small>
+                    </div>
+                </div>
             </p>
         </div>
         <div class="tile__buttons m-0">
@@ -271,6 +281,7 @@ function songFinished() {
 class API {
 
     static songs = [];
+    static rankedSongs = [];
 
     static async getPlayerId(username) {
         const playerUrl = `https://new.scoresaber.com/api/players/by-name/${username}`;
@@ -333,6 +344,13 @@ class API {
                 difficulty: difficultiesMap[difficulty]
             }
         );
+    }
+
+
+
+    static async getStars(hash, difficulty) {
+        // TODO
+        // const stars = await API.getStars(score.songHash, difficultiesMap[song.difficulty]);
     }
 
 
