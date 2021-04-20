@@ -2,7 +2,7 @@
 
 const songsTable = {};
 const WEIGHT_THRESHOLD = 0.85;
-const STEPS = 3;
+const STEPS = 11;
 let step = 0;
 
 $(document).ready(async function () {
@@ -16,8 +16,14 @@ $(document).ready(async function () {
     $(".progress").removeClass("u-none");
 
     const username = location.hash.substring(1);
+
+    setStatus("Searching player");
     const playerId = await API.getPlayerId(username);
+
+    setStatus("Fetching player stats");
     const player = await API.getPlayerData(playerId);
+
+    setStatus("Fetching played map stats");
     const scores = await API.getScores(playerId, 1);
     const data = await buildRenderingData(player, scores);
 
@@ -29,13 +35,13 @@ async function buildRenderingData(player, scores) {
     const data = {
         songs: []
     }
-    console.log("player", player)
-    console.log("scores", scores)
 
-    for (const score of scores) {
+    for (const i in scores) {
+        const score = scores[i];
+
+        setStatus(`Fetching song data (${+i+1} of 8)`);
         const song = await API.getSongData(score.songHash, score.difficulty);
         const songData = Object.assign(song, score);
-        console.log(song.difficulty, difficultiesMap[song.difficulty]);
         songData.pp = round(songData.pp);
         songData.njsOffset = round(songData.njsOffset);
         songData.durationMin = ~~(song.length / 60);
@@ -82,9 +88,9 @@ function setStatus(message) {
     step++;
     $("#progress").css("width", ~~(step / STEPS * 100) + "%");
     $("#progress-status").text(~~(step / STEPS * 100) + "%");
-    $("#progress-message").text(message + `... (${step}/${STEPS})`);
+    $("#progress-message").text(message + `...`);
 
-    if (~~(step / STEPS * 100) === 100) {
+    if (~~(step / STEPS * 100) >= 100) {
         $("#generate-playlist").removeClass("loading hide-text");
         $(".progress").addClass("u-none");
     }
@@ -167,7 +173,7 @@ let audio = new Audio;
 let playing = false;
 let playingSong = "";
 let fetching = false;
-audio.volume = .1;
+audio.volume = .2;
 let previewSong = (() => {
     let e = async (e, t) => {
         let n = URL.createObjectURL(e)
@@ -303,7 +309,6 @@ class API {
 
         const playerUrl = `https://beatsaver.com/api/maps/by-hash/${hash}`;
         const data = await API.get(playerUrl);
-        console.log(data);
 
         // For now only standard maps are supported
         data.metadata.characteristics = data.metadata.characteristics.filter(c => c.name === "Standard");
