@@ -26,13 +26,15 @@ $(document).ready(async function () {
     setStatus("Fetching played map stats");
     const scores = await API.getScores(playerId, 1);
     const data = await buildRenderingData(player, scores);
-
+    
+    renderPlayer(data.player);
     renderSongs(data.songs);
 })
 
 
 async function buildRenderingData(player, scores) {
     const data = {
+        player: player,
         songs: []
     }
 
@@ -79,8 +81,8 @@ function renderSongs(songs) {
 /**
  * Generates the html and shows it
  */
-function renderPlayer(user) {
-    
+function renderPlayer(player) {
+    $("#player").html(generatePlayerProfile(player));
 }
 
 
@@ -99,54 +101,84 @@ function setStatus(message) {
     }
 }
 
+function generatePlayerProfile(player) {
+    console.log(player);
+    return `
+        <figure class="avatar avatar--xlarge">
+            <img src="https://new.scoresaber.com${clean(player.avatar)}">
+        </figure>
+        <h6 class="mb-0 mt-1 u-text-center">
+            ${clean(player.playerName)}
+        </h6>
+        <div>
+            <div class="u-flex mt-2" style="width: fit-content; margin: auto;" class="mt-1">
+                <div class="tag-container group-tags mx-1 mb-0">
+                    <div class="tag tag--dark"><img src="/assets/globe.png" width="16" height="16" /></div>
+                    <div class="tag tag--link">#${clean(player.rank)}</div>
+                </div>
+                <div class="tag-container group-tags mx-1 mb-0">
+                    <div class="tag tag--dark"><img src="https://scoresaber.com/imports/images/flags/${clean(player.country.toLowerCase())}.png" width="16" height="16" /></div>
+                    <div class="tag tag--link">#${clean(player.countryRank)}</div>
+                </div>
+            </div>
+            <div class="tag-container group-tags mb-0" style="width: fit-content; margin: auto;">
+                <div class="tag tag--dark">PP</div>
+                <div class="tag tag--link">${clean(round(player.pp))}</div>
+            </div>
+        </div>
+    `;
+}
 
 function generateSongTile(song) {
     return `
     <div class="tile my-4 hover-grow">
         <div class="tile__icon mr-2">
-            <figure class="avatar"><img src="${song.cover}" /></figure>
-            <div class="tag tag--link mt-1">${song.pp}pp</div><br />
-            <div class="tag">${song.durationMin}m ${song.durationSec}s</div><br />
+            <figure class="avatar"><img src="${clean(song.cover)}" /></figure>
+            <div class="tag tag--link mt-1">${clean(song.pp)}pp</div><br />
+            <div class="tag">${clean(song.durationMin)}m ${clean(song.durationSec)}s</div><br />
         </div>
         <div class="tile__container">
-            <lead class="tile__title m-0 truncate font-bold">${song.name}</lead>
+            <lead class="tile__title m-0 truncate font-bold">${clean(song.name)}</lead>
             <p class="tile__subtitle m-0 truncate">
                 <span>
-                    <div class="tag tag--${song.color} mb-2">${song.difficultyDisplay}</div>
-                    <div class="tag tag--${song.color} ml-1 mb-2 tooltip tooltip--right" data-tooltip="Accuracy">${song.accuracy}%</div><br />
+                    <div class="tag tag--${clean(song.color)} mb-2">${clean(song.difficultyDisplay)}</div>
+                    <div class="tag tag--${clean(song.color)} ml-1 mb-2 tooltip tooltip--right" data-tooltip="Accuracy">${clean(song.accuracy)}%</div><br />
                 </span>
                 <div id="song-data-table" class="col">
                     <div class="tooltip tooltip--right truncate" data-tooltip="Authors username">
-                        ${song.author ? `<b class="info-category font-semibold">Mapper:</b>${song.author}` : ``}
+                        ${clean(song.author) ? `<b class="info-category font-semibold">Mapper:</b>${clean(song.author)}` : ``}
                     </div>
                     <div class="tooltip tooltip--right truncate" data-tooltip="Average Notes per second">
-                        ${song.nps ? `<b class="info-category font-semibold">NPS:</b>${song.nps}` : ``}
+                        ${clean(song.nps) ? `<b class="info-category font-semibold">NPS:</b>${clean(song.nps)}` : ``}
                     </div>
                     <div class="tooltip tooltip--right truncate" data-tooltip="Note Jump Speed">
-                        ${song.njs ? `<b class="info-category font-semibold">NJS:</b>${song.njs}` : ``}
+                        ${clean(song.njs) ? `<b class="info-category font-semibold">NJS:</b>${clean(song.njs)}` : ``}
                     </div>
                     <div class="tooltip tooltip--right truncate" data-tooltip="Note Jump Offset">
-                        ${song.njsOffset ? `<b class="info-category font-semibold">Offset:</b>${song.njsOffset}` : ``}
+                        ${clean(song.njsOffset) ? `<b class="info-category font-semibold">Offset:</b>${clean(song.njsOffset)}` : ``}
                     </div>
                     <div>
-                        <b class="info-category font-semibold">Weighted PP:</b>${song.weightedPP} <small class="tag tag--white">(${song.weightDisplay}%)</small>
+                        <b class="info-category font-semibold">Weighted PP:</b>${clean(song.weightedPP)} <small class="tag tag--white">(${clean(song.weightDisplay)}%)</small>
                     </div>
                 </div>
             </p>
         </div>
         <div class="tile__buttons m-0">
-            <button class="js-listen btn-small" data-key="${song.key}" onclick="listen(this, '${song.zip}')">listen</button>
-            <a href="${song.oneclick}"><button class="btn-primary btn-small uppercase">Install</button></a>
+            <button class="js-listen btn-small" data-key="${clean(song.key)}" onclick="listen(this, '${clean(song.zip)}')">listen</button>
+            <a href="${clean(song.oneclick)}"><button class="btn-primary btn-small uppercase">Install</button></a>
         </div>
     </div>`;
 }
 
 
+function clean(string) {
+    return `${string}`.replace(/<[^>]+>/g, '');
+}
+
 
 function round(number) {
     return ~~(number * 100) / 100;
 }
-
 
 
 function listen(me, url) {
