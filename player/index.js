@@ -192,17 +192,20 @@ function listen(me, url) {
     // If the button that has been click was playing: Stop the song
     if (amIPlaying) {
         songFinished(me);
+        currentPlayedButton = null;
     }
 
     // If user clicked on another button wihtout stopping the last one
     if (playing && !amIPlaying) {
         songFinished();
         previewSong(me, url);
+        currentPlayedButton = me;
     }
 
     // If nothing is playing, just start the song
     if (!playing) {
         previewSong(me, url);
+        currentPlayedButton = me;
     }
 }
 
@@ -215,13 +218,15 @@ let audio = new Audio;
 let playing = false;
 let playingSong = "";
 let fetching = false;
+let currentPlayedButton = null;
 audio.volume = .2;
 let previewSong = (() => {
-    let e = async (e, t) => {
-        let n = URL.createObjectURL(e)
-        audio.src = n
-        audio.currentTime = t
-        await audio.play()
+    let e = async (blob, startTime) => {
+        console.log(e);
+        audio.src = URL.createObjectURL(blob);
+        audio.currentTime = startTime;
+        await audio.play();
+        songStarted(currentPlayedButton);
     }
     let t = async t => {
         t.endsWith(".audica") && (t = `https://bsaber-cors-anywhere.herokuapp.com/${t}`);
@@ -277,7 +282,6 @@ let previewSong = (() => {
 
                 // Add finished event listener
                 audio.addEventListener("ended", () => songFinished(e));
-                songStarted(e);
             })
         }
     }
