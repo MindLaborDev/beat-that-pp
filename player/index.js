@@ -164,6 +164,7 @@ function generateSongTile(song) {
             </p>
         </div>
         <div class="tile__buttons m-0">
+            <button class="btn-small uppercase" onclick="preview('${clean(song.key)}')">Preview Map</button>
             <button class="js-listen btn-small" data-key="${clean(song.key)}" onclick="listen(this, '${clean(song.zip)}')">listen</button>
             <a href="${clean(song.oneclick)}"><button class="btn-primary btn-small uppercase">Install</button></a>
         </div>
@@ -184,6 +185,38 @@ function clean(string) {
  */
 function round(number) {
     return ~~(number * 100) / 100;
+}
+
+
+/**
+ * Start preview of a map
+ */
+let modalVisible = false;
+function preview(key) {
+    const modal = $("#preview-map");
+    const iframe = modal.find("> iframe");
+    iframe.attr("src", `https://skystudioapps.com/bs-viewer/?id=${key}`);
+    modalVisible = true;
+
+    // Show modal after loading (i know there is a better solution - but lets keep it simple, aay)
+    setTimeout(() => {
+        if (modalVisible)
+            modal.removeClass("u-none");
+    }, 1500);
+}
+
+
+/**
+ * Dismisses the preview modal
+ */
+function dismissModal() {
+    modalVisible = false;
+
+    const modal = $("#preview-map");
+    modal.addClass("u-none");
+
+    const iframe = modal.find("> iframe");
+    iframe.attr("src", ``);
 }
 
 
@@ -379,7 +412,16 @@ class API {
         );
     }
 
-    
+
+    /**
+     * Fetches the star difficulty rating of a map
+     */
+    static async loadViewr(leaderboardId) {
+
+        //https://skystudioapps.com/bs-viewer/?id=16b46
+    }
+
+
     /**
      * Converts a zipBlob from jsZip to an Audio
      */

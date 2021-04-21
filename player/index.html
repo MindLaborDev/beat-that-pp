@@ -8,9 +8,16 @@
 
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/cirrus-ui">
     <link rel="stylesheet" type="text/css" href="/player/index.css">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
 </head>
 <body>
 
+    <div class="u-none" id="preview-map" onclick="dismissModal()">
+        <div class="animated u-center loading"></div>
+        <i class="fas fa-times u-position-fixed" onclick="dismissModal()"></i>
+        <iframe></iframe>
+    </div>
+    
     <button onclick="window.history.back();" class="u-position-absolute btn-primary ml-8 mt-8" style="top: 0px; left: 0px;">Back</button>
 
     <div class="top-element">
