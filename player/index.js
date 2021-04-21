@@ -379,16 +379,7 @@ class API {
         );
     }
 
-
-    /**
-     * Fetches the star difficulty rating of a map
-     */
-    static async getStars(hash, difficulty) {
-        // TODO
-        // const stars = await API.getStars(score.songHash, difficultiesMap[song.difficulty]);
-    }
-
-
+    
     /**
      * Converts a zipBlob from jsZip to an Audio
      */
