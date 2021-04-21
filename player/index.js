@@ -26,7 +26,7 @@ $(document).ready(async function () {
     setStatus("Fetching played map stats");
     const scores = await API.getScores(playerId, 1);
     const data = await buildRenderingData(player, scores);
-    
+
     renderPlayer(data.player);
     renderSongs(data.songs);
 })
@@ -41,7 +41,7 @@ async function buildRenderingData(player, scores) {
     for (const i in scores) {
         const score = scores[i];
 
-        setStatus(`Fetching song data (${+i+1} of 8)`);
+        setStatus(`Fetching song data (${+i + 1} of 8)`);
         const song = await API.getSongData(score.songHash, score.difficulty);
         const songData = Object.assign(song, score);
         console.log("score", songData);
@@ -171,16 +171,25 @@ function generateSongTile(song) {
 }
 
 
+/**
+ * Strip html tags from string
+ */
 function clean(string) {
     return `${string}`.replace(/<[^>]+>/g, '');
 }
 
 
+/**
+ * Round a number to 2 decimal points
+ */
 function round(number) {
     return ~~(number * 100) / 100;
 }
 
 
+/**
+ * Runs when user clicked on "listen"
+ */
 function listen(me, url) {
 
     // If programm fetches the song don't iterrupt anything
@@ -193,6 +202,7 @@ function listen(me, url) {
     if (amIPlaying) {
         songFinished(me);
         currentPlayedButton = null;
+        return;
     }
 
     // If user clicked on another button wihtout stopping the last one
@@ -200,99 +210,54 @@ function listen(me, url) {
         songFinished();
         previewSong(me, url);
         currentPlayedButton = me;
+        return;
     }
 
     // If nothing is playing, just start the song
     if (!playing) {
         previewSong(me, url);
         currentPlayedButton = me;
+        return;
     }
 }
 
 
-
 /**
- * Snagged from beastsaber.com
+ * Plays audio preview of a map
  */
 let audio = new Audio;
 let playing = false;
 let playingSong = "";
 let fetching = false;
 let currentPlayedButton = null;
-audio.volume = .2;
-let previewSong = (() => {
-    let e = async (blob, startTime) => {
-        console.log(e);
-        audio.src = URL.createObjectURL(blob);
-        audio.currentTime = startTime;
-        await audio.play();
-        songStarted(currentPlayedButton);
-    }
-    let t = async t => {
-        t.endsWith(".audica") && (t = `https://bsaber-cors-anywhere.herokuapp.com/${t}`);
-        let n = await fetch(t);
-        if (200 == n.status) {
-            let a = new JSZip
-            let o = await a.loadAsync(n.blob());
-            t.endsWith(".audica") ? (async t => {
-                let n = await t.file("song.desc").async("string")
-                let a = JSON.parse(n)
-                let o = a.moggSong
-                let r = o.substring(0, o.length - 4)
-                let i = await t.file(r).async("uint8array")
-                let s = Array.from(i.slice(4, 8));
-                s = (s = s.map(e => {
-                    let t = e.toString(16);
-                    return 1 == t.length && (t = "0" + t),
-                        t
-                }
-                )).reverse(),
-                    s = parseInt(s.join(""), 16);
-                let c = i.slice(s, i.size)
-                let l = new Blob([c], {
-                    type: "application/ogg"
-                })
-                let d = a.previewStartSeconds;
-                await e(l, d)
-            }
-            )(o) : (async t => {
-                let n = t.file("info.dat") || t.file("Info.dat")
-                let a = await n.async("string")
-                let o = JSON.parse(a)
-                let r = o._songFilename
-                let i = await t.file(r).async("blob")
-                let s = o._previewStartTime;
-                await e(i, s)
-            }
-            )(o)
-        }
-    }
-
-    return async (e, n) => {
-        if (audio.pause(), "playing" == e.dataset.state)
+async function previewSong(e, url) {
+    if (audio.pause(), "playing" == e.dataset.state)
+        e.dataset.state = "";
+    else {
+        for (const e of document.querySelectorAll(".js-listen"))
             e.dataset.state = "";
-        else {
-            for (const e of document.querySelectorAll(".js-listen"))
-                e.dataset.state = "";
 
-            fetching = true
-            e.dataset.state = "loading"
-            $(e).addClass("animated loading hide-text");
-            t(n).then(() => {
+        e.dataset.state = "loading"
+        $(e).addClass("animated loading hide-text");
+        songFinished();
+        fetching = true
+        
+        // Download map and play audio
+        const zipBlob = await API.downloadMap(url);
+        audio = await API.getAudioBlob(zipBlob, url.endsWith(".audica"));
+        await audio.play();
+        
+        songStarted(currentPlayedButton);
 
-                // Add finished event listener
-                audio.addEventListener("ended", () => songFinished(e));
-            })
-        }
+        // Add finished event listener
+        audio.addEventListener("ended", () => songFinished(e));
     }
 }
-)();
+
+
 /**
- * Snagged from beastsaber.com
+ * Handles logic for audio preview start
  */
-
-
-
 function songStarted(e) {
     $(e).text("Stop");
     $(e).removeClass("animated loading hide-text");
@@ -304,6 +269,9 @@ function songStarted(e) {
 }
 
 
+/**
+ * Handles logic for audio preview end/stop
+ */
 function songFinished() {
     audio.pause();
     audio.currentTime = 0;
@@ -314,11 +282,31 @@ function songFinished() {
     fetching = false;
 }
 
+
+/**
+ * Convert number of bytes into a readable size string
+ */
+function bytesToSize(bytes) {
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes == 0) return '0 Byte';
+    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+    return round(bytes / Math.pow(1024, i)) + ' ' + sizes[i];
+}
+
+
+
+/**
+ * Handles API Requests
+ */
 class API {
 
     static songs = [];
     static rankedSongs = [];
 
+
+    /**
+     * Searches for a username and returns the player id
+     */
     static async getPlayerId(username) {
         const playerUrl = `https://new.scoresaber.com/api/players/by-name/${username}`;
         const data = await API.get(playerUrl);
@@ -334,6 +322,9 @@ class API {
     }
 
 
+    /**
+     * Fetches data of the player
+     */
     static async getPlayerData(playerId) {
         const playerUrl = `https://new.scoresaber.com/api/player/${playerId}/full`;
         const data = await API.get(playerUrl);
@@ -341,6 +332,9 @@ class API {
     }
 
 
+    /**
+     * Fetches the scores of a player
+     */
     static async getScores(playerId, page) {
         const playerUrl = `https://new.scoresaber.com/api/player/${playerId}/scores/top/${page}`;
         const data = await API.get(playerUrl);
@@ -348,6 +342,9 @@ class API {
     }
 
 
+    /**
+     * Fetches the data of a map
+     */
     static async getSongData(hash, difficulty) {
 
         // Check if we already have the song
@@ -383,13 +380,81 @@ class API {
     }
 
 
-
+    /**
+     * Fetches the star difficulty rating of a map
+     */
     static async getStars(hash, difficulty) {
         // TODO
         // const stars = await API.getStars(score.songHash, difficultiesMap[song.difficulty]);
     }
 
 
+    /**
+     * Converts a zipBlob from jsZip to an Audio
+     */
+    static async getAudioBlob(zipBlob, audica=false) {
+
+        const audio = new Audio;
+        audio.volume = .2;
+
+        if (audica) {
+            const descFile = await zipBlob.file("song.desc").async("string")
+            const description = JSON.parse(descFile)
+            const filename = description.moggSong.substring(0, description.moggSong.length - 4)
+            const bytes = await zipBlob.file(filename).async("uint8array")
+            let s = Array.from(bytes.slice(4, 8));
+            s = (s = s.map(e => {
+                let t = e.toString(16);
+                return 1 == t.length && (t = "0" + t), t
+            }
+            )).reverse(), s = parseInt(s.join(""), 16);
+
+            const chunk = bytes.slice(s, bytes.size)
+            const blob = new Blob([chunk], {
+                type: "application/ogg"
+            })
+
+            audio.src = URL.createObjectURL(blob);
+            audio.currentTime = description.previewStartSeconds;
+            return audio;
+        } else {
+            const infoFile = zipBlob.file("info.dat") || zipBlob.file("Info.dat")
+            const infoString = await infoFile.async("string")
+            const infos = JSON.parse(infoString)
+
+            const filename = infos._songFilename
+            const blob = await zipBlob.file(filename).async("blob")
+
+            audio.src = URL.createObjectURL(blob);
+            audio.currentTime = infos._previewStartTime;
+            return audio;
+        }
+    }
+
+
+    /**
+     * Downloads the map
+     */
+    static async downloadMap(url) {
+        url.endsWith(".audica") && (url = `https://bsaber-cors-anywhere.herokuapp.com/${url}`);
+
+        const response = await fetch(url);
+        const bytes = response.headers.get("content-length");
+        const size = bytesToSize(bytes);
+        console.log(size);
+
+        if (200 != response.status)
+            return;
+
+        const zip = new JSZip;
+        const zipBlob = await zip.loadAsync(response.blob());
+        return zipBlob;
+    }
+
+
+    /**
+     * Just an HTTP Request
+     */
     static get(url) {
         return new Promise(resolve => {
             $.get(url, async function (data, status) {
@@ -408,6 +473,4 @@ class API {
             });
         });
     }
-
-
 }
