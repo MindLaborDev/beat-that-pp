@@ -1,0 +1,46 @@
+.progress > div {
+    width: 100%;
+    height: 3px;
+    border-radius: 2px;
+    background-color: var(--cirrus-light);
+}
+
+.progress > div > div {
+    width: 0%;
+    height: 3px;
+    border-radius: 2px;
+    background-color: var(--cirrus-primary);
+    transition: width 0.3s;
+}
+
+.top-element {
+    width: 50%;
+    margin: auto;
+    transition: padding-top 0.3s;
+}
+
+#song-hero {
+    display: flex;
+}
+
+#song-hero > div {
+    flex: 1;
+}
+
+#song-hero > .song-img {
+    flex: 0 0 10rem;
+}
+
+#song-hero > div > img {
+    width: 8rem;
+    height: 8rem;
+    object-fit: cover;
+}
+
+.song-footer {
+    flex: 0 0 6rem !important;
+}
+
+.not-loaded {
+    display: none;
+}

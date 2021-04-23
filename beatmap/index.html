@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>...</title>
+
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/cirrus-ui">
+    <link rel="stylesheet" type="text/css" href="/beatmap/index.css">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+</head>
+<body>
+    
+    <button onclick="window.history.back();" class="u-position-absolute btn-primary ml-8 mt-8" style="top: 0px; left: 0px;">Back</button>
+
+    <div class="top-element">
+        <div id="player" class="pt-16"></div>
+        <div class="pb-8 pt-8">
+            <div id="song-hero"></div>
+            <div class="progress pt-16 not-loaded">
+                <label id="progress-message"></label>
+                <div class="light"><div id="progress" class="primary"></div></div>
+                <span id="progress-status"></span>
+            </div>
+        </div>
+        <div class="tab-container tabs-center not-loaded" id="difficulty-menu">
+            <ul>
+                <li data-did="1"><div class="tab-item-content">Easy</div></li>
+                <li data-did="3"><div class="tab-item-content">Normal</div></li>
+                <li data-did="5"><div class="tab-item-content">Hard</div></li>
+                <li data-did="7"><div class="tab-item-content">Expert</div></li>
+                <li data-did="9" class="selected"><div class="tab-item-content">Expert+</div></li>
+            </ul>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.min.js" integrity="sha256-lISRn4x2bHaafBiAb0H5C7mqJli7N0SH+vrapxjIz3k=" crossorigin="anonymous"></script>
+    <script src="/vendor/jszip.min.js"></script>
+    <script src="/helper.js"></script>
+    <script src="/beatmap/index.js"></script>
+</body>
+</html>
