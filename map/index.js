@@ -12,13 +12,14 @@ let map;
 $(document).ready(async function () {
 
     const args = location.hash.split(",");
-    if (args.length < 2) {
-        //window.location.href = "/";
+    if (args.length < 1) {
+        window.location.href = "/";
         return;
+    } else if (args.length > 2) {
+        difficulty = +args[1];
     }
 
     const key = args[0].substring(1);
-    difficulty = +args[1];
 
     map = await API.getMapDetails(key);
     if (map === 404)
@@ -212,13 +213,22 @@ async function decodeZippedMap(blob, audica = false) {
         const infoFile = zipBlob.file("info.dat") || zipBlob.file("Info.dat");
         const infoString = await infoFile.async("string");
         const infos = JSON.parse(infoString);
-
         setStatus(`Analysing your map...`, 92);
 
         const beatmap = infos._difficultyBeatmapSets.find(dbs => dbs._beatmapCharacteristicName === "Standard");
         if (!beatmap)
             return;
         
+        // Choose default difficulty
+        if (difficulty == null) {
+            beatmap._difficultyBeatmaps.reverse();
+            const found = beatmap._difficultyBeatmaps.find(db => [9, 7, 5, 3, 1].includes(db._difficultyRank));
+            beatmap._difficultyBeatmaps.reverse();
+            if (!found) 
+                return;
+            difficulty = found._difficultyRank;
+        }
+
         const maps = {
             1: beatmap._difficultyBeatmaps.find(db => db._difficultyRank === 1),
             3: beatmap._difficultyBeatmaps.find(db => db._difficultyRank === 3),
@@ -252,7 +262,7 @@ async function decodeZippedMap(blob, audica = false) {
 
 
 async function download(url) {
-    const response = await fetch(url, { importance: "low" });
+    const response = await fetch(url);
     const reader = response.body.getReader();
     const contentLength = +response.headers.get('content-length');
 
