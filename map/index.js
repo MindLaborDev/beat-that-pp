@@ -6,6 +6,9 @@ let progressStatusElement;
 let progressMessageElement;
 let progressWrapper;
 let difficulty;
+let audio;
+let data;
+let map;
 $(document).ready(async function () {
 
     const args = location.hash.split(",");
@@ -17,7 +20,7 @@ $(document).ready(async function () {
     const key = args[0].substring(1);
     difficulty = +args[1];
 
-    const map = await API.getMapDetails(key);
+    map = await API.getMapDetails(key);
     if (map === 404)
         return;
     //console.log(map);
@@ -31,7 +34,7 @@ $(document).ready(async function () {
     const zip = `https://beatsaver.com${map.directDownload}`;
     const blob = await download(zip);
 
-    const data = await decodeZippedMap(blob, zip.endsWith(".audica"));
+    data = await decodeZippedMap(blob, zip.endsWith(".audica"));
     console.log(data);
 
     // Show song informations
@@ -46,15 +49,15 @@ $(document).ready(async function () {
     })
 
     renderDifficultyMenu(data.beatmap);
-    renderBasicMapInfos(data, map);
+    renderBasicMapInfos();
 
 })
 
 
-function renderBasicMapInfos(data, map) {
+function renderBasicMapInfos() {
 
     let reqHTML = [];
-    for (const req of data.map._customData._requirements) {
+    for (const req of data.maps[difficulty]._customData._requirements) {
         const link = modLinks[req] ? `href="${modLinks[req]}" target="_blank"` : "";
         reqHTML.push(`<a ${link}>${req}</a>`);
     }
@@ -105,10 +108,10 @@ function renderBasicMapInfos(data, map) {
                     <span class="key-2 u-text-ellipsis">Notes per second</span><span class="value-2">${round(data.mapData._notes.length / data.audio.duration)}</span>
                 </div>
                 <div>
-                    <span class="key-2 u-text-ellipsis">Note jump speed</span><span class="value-2">${round(data.map._noteJumpMovementSpeed)}</span>
+                    <span class="key-2 u-text-ellipsis">Note speed (njs)</span><span class="value-2">${round(data.maps[difficulty]._noteJumpMovementSpeed)}</span>
                 </div>
                 <div>
-                    <span class="key-2 u-text-ellipsis">Note beat offset</span><span class="value-2">${round(data.map._noteJumpStartBeatOffset)}</span>
+                    <span class="key-2 u-text-ellipsis">Note start offset</span><span class="value-2">${round(data.maps[difficulty]._noteJumpStartBeatOffset)}</span>
                 </div>
                 <div>
                     <span class="key-2 u-text-ellipsis">Beats per minute</span><span class="value-2">${round(data.infos._beatsPerMinute)}</span>
@@ -127,12 +130,29 @@ function renderBasicMapInfos(data, map) {
     `);
 }
 
+async function selectDifficulty(difficultyRank) {
+    difficulty = difficultyRank;
+    
+    const mapFile = data.zipBlob.file(data.maps[difficulty]._beatmapFilename);
+    const mapString = await mapFile.async("string");
+    data.mapData = JSON.parse(mapString);
+
+    // Split bombs and notes
+    data.mapData._bombs = data.mapData._notes.filter(n => n._type === 3);
+    data.mapData._notes = data.mapData._notes.filter(n => n._type !== 3);
+
+    renderBasicMapInfos();
+
+    $("#difficulty-menu li").removeClass("selected");
+    $(`#difficulty-menu li[data-did="${difficulty}"]`).addClass("selected");
+}
+
 
 function renderDifficultyMenu(beatmap) {
     const html = beatmap._difficultyBeatmaps.reduce((acc, cv) => {
         const selected = difficulty === cv._difficultyRank ? `class="selected"` : "";
-        const d = difficultyDisplayMap[cv._difficulty] || cv._difficulty;
-        return acc + `<li data-did="${cv._difficultyRank}" ${selected}><div class="tab-item-content">${d}</div></li>`
+        const d = (cv._customData._difficultyLabel+"") || difficultyDisplayMap[cv._difficulty] || cv._difficulty;
+        return acc + `<li data-did="${cv._difficultyRank}" ${selected} onclick="selectDifficulty(${cv._difficultyRank})"><div class="tab-item-content">${d}</div></li>`
     }, "");
 
     $("#difficulty-menu").html(`<ul>${html}</ul>`);
@@ -143,7 +163,7 @@ function renderDifficultyMenu(beatmap) {
 function renderSongHero(data) {
     $("#song-hero").html(`
         <div class="song-img">
-            <img class="u-circle" src="${data.cover}" importance="high" />
+            <img class="u-circle" src="${data.cover}" />
         </div>
         <div>
             <h4>${data.title}</h4>
@@ -160,7 +180,7 @@ function renderSongHero(data) {
                 </a>
             </div>
             <div class="my-2">
-                <button class="js-listen btn-small" data-key="${data.key}" onclick="listen(this, '${data.zip}')">listen</button>
+                <button class="js-listen btn-small" onclick="listen(this)">listen</button>
             </div>
         </div>
     `);
@@ -198,17 +218,21 @@ async function decodeZippedMap(blob, audica = false) {
         const beatmap = infos._difficultyBeatmapSets.find(dbs => dbs._beatmapCharacteristicName === "Standard");
         if (!beatmap)
             return;
-
-        const map = beatmap._difficultyBeatmaps.find(db => db._difficultyRank === difficulty);
-        if (!map)
-            return;
-
-        const mapFile = zipBlob.file(map._beatmapFilename);
-        const mapString = await mapFile.async("string");
-        setStatus(`Analysing your map...`, 94);
         
+        const maps = {
+            1: beatmap._difficultyBeatmaps.find(db => db._difficultyRank === 1),
+            3: beatmap._difficultyBeatmaps.find(db => db._difficultyRank === 3),
+            5: beatmap._difficultyBeatmaps.find(db => db._difficultyRank === 5),
+            7: beatmap._difficultyBeatmaps.find(db => db._difficultyRank === 7),
+            9: beatmap._difficultyBeatmaps.find(db => db._difficultyRank === 9),
+        }
+
+        const mapFile = zipBlob.file(maps[difficulty]._beatmapFilename);
+        const mapString = await mapFile.async("string");
         const mapData = JSON.parse(mapString);
-        const audio = await API.getAudioBlob(zipBlob);
+        setStatus(`Analysing your map...`, 94);
+
+        audio = await API.getAudioBlob(zipBlob);
         setStatus(`Analysing your map...`, 100);
 
         // Split bombs and notes
@@ -217,10 +241,11 @@ async function decodeZippedMap(blob, audica = false) {
 
         return {
             infos,
-            map,
+            maps,
             beatmap,
             mapData,
-            audio
+            audio,
+            zipBlob
         }
     }
 }
@@ -260,4 +285,42 @@ async function download(url) {
     }
 
     return new Blob([chunksAll]);
+}
+
+
+/**
+ * Runs when user clicked on "listen"
+ */
+let playing = false;
+function listen(me) {
+
+    // If the button that has been click was playing: Stop the song
+    if (playing)
+        songFinished(me);
+
+    // If nothing is playing, just start the song
+    else
+        songStarted(me);
+}
+
+
+/**
+ * Handles logic for audio preview start
+ */
+async function songStarted(e) {
+    await audio.play();
+    $(e).text("Stop");
+    $(e).removeClass("animated loading hide-text");
+    playing = true;
+}
+
+
+/**
+ * Handles logic for audio preview end/stop
+ */
+function songFinished() {
+    audio.pause();
+    audio.currentTime = data.infos._previewStartTime;
+    $(".js-listen").text("Listen");
+    playing = false;
 }
