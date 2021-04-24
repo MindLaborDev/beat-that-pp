@@ -44,3 +44,45 @@
 .not-loaded {
     display: none;
 }
+
+#map-general-infos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.key-1 {
+    display: inline-block;
+    flex: 0 0 6rem;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.key-2 {
+    display: inline-block;
+    flex: 0 0 10rem;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+#map-general-infos > div > div {
+    display: flex;
+}
+
+.value-1 {
+    display: inline-block;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.value-2 {
+    display: inline-block;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.date {
+    font-size: 0.75rem;
+    color: var(--cirrus-dark-gray);
+}

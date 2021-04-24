@@ -27,6 +27,13 @@ function bytesToSize(bytes) {
 }
 
 
+function convertDate(string) {
+    const date = new Date(string);
+    const months = ["Jan", "Feb", "Mar","Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return date.getDate() + " " + months[date.getMonth()] + " " + date.getFullYear();
+}
+
+
 /**
  * Start preview of a map
  */
@@ -157,43 +164,48 @@ class API {
     /**
      * Converts a zipBlob from jsZip to an Audio
      */
-    static async getAudioBlob(zipBlob, audica = false) {
+    static getAudioBlob(zipBlob, audica = false) {
+        return new Promise(async resolve => {
+            const audio = new Audio;
+            audio.volume = .2;
 
-        const audio = new Audio;
-        audio.volume = .2;
+            if (audica) {
+                const descFile = await zipBlob.file("song.desc").async("string")
+                const description = JSON.parse(descFile)
+                const filename = description.moggSong.substring(0, description.moggSong.length - 4)
+                const bytes = await zipBlob.file(filename).async("uint8array")
+                let s = Array.from(bytes.slice(4, 8));
+                s = (s = s.map(e => {
+                    let t = e.toString(16);
+                    return 1 == t.length && (t = "0" + t), t
+                }
+                )).reverse(), s = parseInt(s.join(""), 16);
 
-        if (audica) {
-            const descFile = await zipBlob.file("song.desc").async("string")
-            const description = JSON.parse(descFile)
-            const filename = description.moggSong.substring(0, description.moggSong.length - 4)
-            const bytes = await zipBlob.file(filename).async("uint8array")
-            let s = Array.from(bytes.slice(4, 8));
-            s = (s = s.map(e => {
-                let t = e.toString(16);
-                return 1 == t.length && (t = "0" + t), t
+                const chunk = bytes.slice(s, bytes.size)
+                const blob = new Blob([chunk], {
+                    type: "application/ogg"
+                })
+
+                audio.src = URL.createObjectURL(blob);
+                audio.currentTime = description.previewStartSeconds;
+                audio.onloadedmetadata = function () {
+                    resolve(audio);
+                }
+            } else {
+                const infoFile = zipBlob.file("info.dat") || zipBlob.file("Info.dat")
+                const infoString = await infoFile.async("string")
+                const infos = JSON.parse(infoString)
+
+                const filename = infos._songFilename
+                const blob = await zipBlob.file(filename).async("blob")
+
+                audio.src = URL.createObjectURL(blob);
+                audio.currentTime = infos._previewStartTime;
+                audio.onloadedmetadata = function () {
+                    resolve(audio);
+                }
             }
-            )).reverse(), s = parseInt(s.join(""), 16);
-
-            const chunk = bytes.slice(s, bytes.size)
-            const blob = new Blob([chunk], {
-                type: "application/ogg"
-            })
-
-            audio.src = URL.createObjectURL(blob);
-            audio.currentTime = description.previewStartSeconds;
-            return audio;
-        } else {
-            const infoFile = zipBlob.file("info.dat") || zipBlob.file("Info.dat")
-            const infoString = await infoFile.async("string")
-            const infos = JSON.parse(infoString)
-
-            const filename = infos._songFilename
-            const blob = await zipBlob.file(filename).async("blob")
-
-            audio.src = URL.createObjectURL(blob);
-            audio.currentTime = infos._previewStartTime;
-            return audio;
-        }
+        });
     }
 
 

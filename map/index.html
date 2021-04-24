@@ -7,7 +7,7 @@
     <title>...</title>
 
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/cirrus-ui">
-    <link rel="stylesheet" type="text/css" href="/beatmap/index.css">
+    <link rel="stylesheet" type="text/css" href="/map/index.css">
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
 </head>
 <body>
@@ -24,14 +24,10 @@
                 <span id="progress-status"></span>
             </div>
         </div>
-        <div class="tab-container tabs-center not-loaded" id="difficulty-menu">
-            <ul>
-                <li data-did="1"><div class="tab-item-content">Easy</div></li>
-                <li data-did="3"><div class="tab-item-content">Normal</div></li>
-                <li data-did="5"><div class="tab-item-content">Hard</div></li>
-                <li data-did="7"><div class="tab-item-content">Expert</div></li>
-                <li data-did="9" class="selected"><div class="tab-item-content">Expert+</div></li>
-            </ul>
+        <div class="tab-container tabs-center not-loaded" id="difficulty-menu"></div>
+        <div id="map-general-info-wrapper">
+            
+
         </div>
     </div>
     
@@ -39,6 +35,22 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.min.js" integrity="sha256-lISRn4x2bHaafBiAb0H5C7mqJli7N0SH+vrapxjIz3k=" crossorigin="anonymous"></script>
     <script src="/vendor/jszip.min.js"></script>
     <script src="/helper.js"></script>
-    <script src="/beatmap/index.js"></script>
+    <script>
+        const difficultyDisplayMap = {
+            "ExpertPlus": "Expert+"
+        }
+        const modLinks = {
+            "Noodle Extensions": "https://github.com/Aeroluna/NoodleExtensions/releases/latest",
+            "Chroma": "https://github.com/Aeroluna/Chroma/releases/latest"
+        }
+        const difficultiesMap = {
+            1: "easy",
+            3: "normal",
+            5: "hard",
+            7: "expert",
+            9: "expertPlus"
+        };
+    </script>
+    <script src="/map/index.js"></script>
 </body>
 </html>
