@@ -88,13 +88,13 @@ function renderBasicMapInfos(data, map) {
                     <span class="key-1 u-text-ellipsis">&nbsp;</span>
                 </div>
                 <div>
-                    <span class="key-1 u-text-ellipsis">Notes</span><span class="value-1">??</span>
+                    <span class="key-1 u-text-ellipsis">Notes</span><span class="value-1">${data.mapData._notes.length}</span>
                 </div>
                 <div>
-                    <span class="key-1 u-text-ellipsis">Obstacles</span><span class="value-1">??</span>
+                    <span class="key-1 u-text-ellipsis">Obstacles</span><span class="value-1">${data.mapData._obstacles.length}</span>
                 </div>
                 <div>
-                    <span class="key-1 u-text-ellipsis">Bombs</span><span class="value-1">??</span>
+                    <span class="key-1 u-text-ellipsis">Bombs</span><span class="value-1">${data.mapData._bombs.length}</span>
                 </div>
             </div>
             <div>
@@ -102,7 +102,7 @@ function renderBasicMapInfos(data, map) {
                     <span class="key-2 u-text-ellipsis">Star difficulty</span><span class="value-2">??</span>
                 </div>
                 <div>
-                    <span class="key-2 u-text-ellipsis">Notes per second</span><span class="value-2">??</span>
+                    <span class="key-2 u-text-ellipsis">Notes per second</span><span class="value-2">${round(data.mapData._notes.length / data.audio.duration)}</span>
                 </div>
                 <div>
                     <span class="key-2 u-text-ellipsis">Note jump speed</span><span class="value-2">${round(data.map._noteJumpMovementSpeed)}</span>
@@ -210,6 +210,10 @@ async function decodeZippedMap(blob, audica = false) {
         const mapData = JSON.parse(mapString);
         const audio = await API.getAudioBlob(zipBlob);
         setStatus(`Analysing your map...`, 100);
+
+        // Split bombs and notes
+        mapData._bombs = mapData._notes.filter(n => n._type === 3);
+        mapData._notes = mapData._notes.filter(n => n._type !== 3);
 
         return {
             infos,
