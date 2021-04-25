@@ -11,6 +11,8 @@ $(document).ready(function ()
         $("#error-msg").addClass("u-none");
         let key = input.val().trim();
         key = key.replace(/!bsr\s*/g, "")
+        key = key.replace(/https?:\/\//g, "")
+        key = key.replace(/beatsaver.com\/beatmap\//g, "")
 
         // Error handling
         if (!key) {

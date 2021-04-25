@@ -155,7 +155,7 @@ async function selectDifficulty(difficultyRank) {
 function renderDifficultyMenu(beatmap) {
     const html = beatmap._difficultyBeatmaps.reduce((acc, cv) => {
         const selected = difficulty === cv._difficultyRank ? `class="selected"` : "";
-        const d = (cv._customData._difficultyLabel+"") || difficultyDisplayMap[cv._difficulty] || cv._difficulty;
+        const d = cv._customData._difficultyLabel || difficultyDisplayMap[cv._difficulty] || cv._difficulty;
         return acc + `<li data-did="${cv._difficultyRank}" ${selected} onclick="selectDifficulty(${cv._difficultyRank})"><div class="tab-item-content">${d}</div></li>`
     }, "");
 
