@@ -157,6 +157,9 @@ class API {
     static async getMapDetails(key) {
         const mapUrl = `https://beatsaver.com/api/maps/detail/${key}`;
         const data = await API.get(mapUrl);
+        const diffs = await API.get(`https://deep-beat.000webhostapp.com/?hash=${data.hash}`);
+        console.log(diffs);
+        data._diffs = JSON.parse(diffs)
         return data;
     }
 

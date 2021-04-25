@@ -1,6 +1,5 @@
 "use strict";
 
-
 let progressElement;
 let progressStatusElement;
 let progressMessageElement;
@@ -66,6 +65,7 @@ function renderBasicMapInfos() {
 
     let min = ~~(~~data.audio.duration / 60);
     let sec = ~~data.audio.duration % 60;
+    let starData = map._diffs.find(d => d.diff === difficulty);
 
     $("#map-general-info-wrapper").html(`
         <!-- https://cdn.wes.cloud/beatstar/bssb/v2-all.json -->
@@ -102,8 +102,18 @@ function renderBasicMapInfos() {
                 </div>
             </div>
             <div>
+                ${starData ? `
+                    <div>
+                        <span class="key-2 u-text-ellipsis">Star difficulty</span><span class="value-2">${round(starData.stars)} <i class="fas fa-star"></i></span>
+                    </div>
+                ` : ``}
+                ${starData ? `
+                    <div>
+                        <span class="key-2 u-text-ellipsis">Max pp</span><span class="value-2">${round(starData.pp)}</span>
+                    </div>
+                ` : ``}
                 <div>
-                    <span class="key-2 u-text-ellipsis">Star difficulty</span><span class="value-2">??</span>
+                    <span class="key-2 u-text-ellipsis">&nbsp;</span>
                 </div>
                 <div>
                     <span class="key-2 u-text-ellipsis">Notes per second</span><span class="value-2">${round(data.mapData._notes.length / data.audio.duration)}</span>
@@ -116,15 +126,6 @@ function renderBasicMapInfos() {
                 </div>
                 <div>
                     <span class="key-2 u-text-ellipsis">Beats per minute</span><span class="value-2">${round(data.infos._beatsPerMinute)}</span>
-                </div>
-                <div>
-                    <span class="key-2 u-text-ellipsis">&nbsp;</span>
-                </div>
-                <div>
-                    <span class="key-2 u-text-ellipsis">Max pp</span><span class="value-2">??</span>
-                </div>
-                <div>
-                    <span class="key-2 u-text-ellipsis">Max score</span><span class="value-2">??</span>
                 </div>
             </div>
         </div>
