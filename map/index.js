@@ -23,7 +23,7 @@ $(document).ready(async function () {
     map = await API.getMapDetails(key);
     if (map === 404)
         return;
-    //console.log(map);
+    console.log(map);
 
     // Download map
     progressElement = $("#progress");
@@ -136,8 +136,10 @@ function renderBasicMapInfos() {
 
 async function selectDifficulty(difficultyRank) {
     difficulty = difficultyRank;
-    
-    const mapFile = data.zipBlob.file(data.maps[difficulty]._beatmapFilename);
+
+    const zip = new JSZip;
+    const zipBlob = await zip.loadAsync(data.blob);
+    const mapFile = zipBlob.file(data.maps[difficulty]._beatmapFilename);
     const mapString = await mapFile.async("string");
     data.mapData = JSON.parse(mapString);
 
@@ -163,7 +165,6 @@ function renderDifficultyMenu(beatmap) {
     $("#difficulty-menu").removeClass("not-loaded");
 }
 
-
 function renderSongHero(data) {
     $("#song-hero").html(`
         <div class="song-img">
@@ -179,9 +180,15 @@ function renderSongHero(data) {
         </div>
         <div class="song-footer">
             <div class="my-2">
-                <a class="p-0" href="${data.oneclick}">
-                    <button class="btn-primary btn-small uppercase">Install</button>
-                </a>
+            <div class="list-dropdown">
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="window.location.href = '${data.oneclick}';">Install</button>
+                    <button class="btn-primary btn-small btn-dropdown"><i class="fa fa-wrapper fa-caret-down" aria-hidden="true"></i></button>
+                    <ul class="menu">
+                        <li class="menu-item" onclick="downloadMap()"><a>Download Map</a></li>
+                        <li class="menu-item" onclick="copyTextToClipboard('!bsr ${map.key}')"><a>Copy !bsr</a></li>
+                    </ul>
+                </div>
             </div>
             <div class="my-2">
                 <button class="js-listen btn-small" onclick="listen(this)">listen</button>
@@ -199,6 +206,22 @@ function setStatus(message, percentage) {
     if (percentage >= 100) {
         progressWrapper.addClass("u-none");
     }
+}
+
+
+function downloadMap() {
+
+    // Create invisible link
+    const a = document.createElement("a");
+    a.style = "display: none";
+    document.body.appendChild(a);
+
+    // Create url and click link
+    const url = URL.createObjectURL(data.blob);
+    a.href = url;
+    a.download = `(${map.key}) - ${data.infos._songName}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 
@@ -221,13 +244,13 @@ async function decodeZippedMap(blob, audica = false) {
         const beatmap = infos._difficultyBeatmapSets.find(dbs => dbs._beatmapCharacteristicName === "Standard");
         if (!beatmap)
             return;
-        
+
         // Choose default difficulty
         if (difficulty == null) {
             beatmap._difficultyBeatmaps.reverse();
             const found = beatmap._difficultyBeatmaps.find(db => [9, 7, 5, 3, 1].includes(db._difficultyRank));
             beatmap._difficultyBeatmaps.reverse();
-            if (!found) 
+            if (!found)
                 return;
             difficulty = found._difficultyRank;
         }
@@ -258,7 +281,7 @@ async function decodeZippedMap(blob, audica = false) {
             beatmap,
             mapData,
             audio,
-            zipBlob
+            blob
         }
     }
 }
@@ -336,4 +359,41 @@ function songFinished() {
     audio.currentTime = data.infos._previewStartTime;
     $(".js-listen").text("Listen");
     playing = false;
+}
+
+function fallbackCopyTextToClipboard(text) {
+    var textArea = document.createElement("textarea");
+    textArea.value = text;
+
+    // Avoid scrolling to bottom
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+        var successful = document.execCommand('copy');
+        var msg = successful ? 'successful' : 'unsuccessful';
+        console.log('Fallback: Copying text command was ' + msg);
+    } catch (err) {
+        console.error('Fallback: Oops, unable to copy', err);
+    }
+
+    document.body.removeChild(textArea);
+}
+
+
+function copyTextToClipboard(text) {
+    if (!navigator.clipboard) {
+        fallbackCopyTextToClipboard(text);
+        return;
+    }
+    navigator.clipboard.writeText(text).then(function () {
+        console.log('Async: Copying to clipboard was successful!');
+    }, function (err) {
+        console.error('Async: Could not copy text: ', err);
+    });
 }

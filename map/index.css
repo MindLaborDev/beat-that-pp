@@ -38,7 +38,8 @@
 }
 
 .song-footer {
-    flex: 0 0 6rem !important;
+    flex: 0 0 10rem !important;
+    padding-left: 3rem;
 }
 
 .not-loaded {
