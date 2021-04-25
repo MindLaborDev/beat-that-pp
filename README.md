@@ -1,4 +1,5 @@
-# beat-that-pp
-Increase your BeatSaber pp score with custom song recommendations that fits your level and play style.
+# Deep Beat
 
-Work in progress
+Analyze custom beat saber maps without installing or playing them and see if they fit your playstyle and level.
+
+WORK IN PROGRESS
