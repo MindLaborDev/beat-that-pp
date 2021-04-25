@@ -65,7 +65,9 @@ function renderBasicMapInfos() {
 
     let min = ~~(~~data.audio.duration / 60);
     let sec = ~~data.audio.duration % 60;
-    let starData = map._diffs.find(d => d.diff === difficulty);
+    let starData;
+    if (map._diffs != null)
+        starData = map._diffs.find(d => d.diff === difficulty);
 
     $("#map-general-info-wrapper").html(`
         <!-- https://cdn.wes.cloud/beatstar/bssb/v2-all.json -->
