@@ -12,13 +12,14 @@
 <body>
 
     <div class="top-element">
-        <div class="mb-4">
-            <h1 class="mb-0">Beat that PP</h1>
-            <h6 class="font-alt font-light uppercase">Your ScoreSaber profile on steroids</h6>
+        <div class="mb-6">
+            <h1 class="mb-1">Deep Beat</h1>
+            <h6 class="font-light">A custom beatsaber map analyser</h6>
         </div>
-        <label>Scoresaber Username</label>
-        <input id="username" type="text" class="mb-4" />
-        <button id="generate-playlist" class="btn-primary animated mt-2">View Profile</button>
+        <label>Beatmap Key</label>
+        <input id="key" type="text" placeholder="!bsr 13377"/>
+        <span id="error-msg" class="info u-none error"></span>
+        <button id="generate-song-report" class="btn-primary animated mt-6">Analyse Map</button>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script>

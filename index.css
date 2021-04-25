@@ -6,3 +6,7 @@
     margin: auto;
     transition: padding-top 0.3s;
 }
+
+.error {
+    color: var(--cirrus-danger);
+}

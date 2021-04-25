@@ -154,12 +154,16 @@ class API {
     /**
      * Fetches data about a map
      */
-    static async getMapDetails(key) {
+    static async getMapDetails(key, include_stars=true) {
         const mapUrl = `https://beatsaver.com/api/maps/detail/${key}`;
         const data = await API.get(mapUrl);
-        const diffs = await API.get(`https://deep-beat.000webhostapp.com/?hash=${data.hash}`);
-        console.log(diffs);
-        data._diffs = JSON.parse(diffs)
+        if (data === 404)
+            return;
+        
+        if (include_stars) {
+            const diffs = await API.get(`https://deep-beat.000webhostapp.com/?hash=${data.hash}`);
+            data._diffs = JSON.parse(diffs)
+        }
         return data;
     }
 
