@@ -10,24 +10,34 @@
     height: 3px;
     border-radius: 2px;
     background-color: var(--cirrus-primary);
+    -webkit-transition: width 0.3s;
+    -o-transition: width 0.3s;
     transition: width 0.3s;
 }
 
 .top-element {
     width: 50%;
     margin: auto;
+    -webkit-transition: padding-top 0.3s;
+    -o-transition: padding-top 0.3s;
     transition: padding-top 0.3s;
 }
 
 #song-hero {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
 }
 
 #song-hero > div {
+    -webkit-box-flex: 1;
+    -ms-flex: 1;
     flex: 1;
 }
 
 #song-hero > .song-img {
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 10rem;
     flex: 0 0 10rem;
     margin-right: 1rem;
 }
@@ -35,10 +45,13 @@
 #song-hero > div > img {
     width: 8rem;
     height: 8rem;
+    -o-object-fit: cover;
     object-fit: cover;
 }
 
 .song-footer {
+    -webkit-box-flex: 0 !important;
+    -ms-flex: 0 0 10rem !important;
     flex: 0 0 10rem !important;
     padding-left: 3rem;
 }
@@ -48,21 +61,31 @@
 }
 
 #map-general-infos {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
+    -ms-flex-wrap: wrap;
     flex-wrap: wrap;
 }
 
 #map-general-infos > div:first-child {
     min-width: 300px;
+    max-width: 500px;
+    -webkit-box-flex: 1;
+    -ms-flex: 1;
     flex: 1;
 }
 
 #map-general-infos > div:last-child {
-    flex: 1 0 1;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 12rem;
+    flex: 0 0 12rem;
 }
 
 .key-1 {
     display: inline-block;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 6rem;
     flex: 0 0 6rem;
     white-space: nowrap;
     overflow: hidden;
@@ -70,17 +93,23 @@
 
 .key-2 {
     display: inline-block;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 6rem;
     flex: 0 0 6rem;
     white-space: nowrap;
     overflow: hidden;
 }
 
 #map-general-infos > div > div {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
 }
 
 .value-1 {
     display: inline-block;
+    -webkit-box-flex: 1;
+    -ms-flex: 1;
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -88,6 +117,8 @@
 
 .value-2 {
     display: inline-block;
+    -webkit-box-flex: 1;
+    -ms-flex: 1;
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -107,10 +138,6 @@
     .top-element {
         width: 70%;
     }
-
-    #map-general-infos > div:last-child {
-        flex: 1 0 12rem;
-    }
 }
 
 @media only screen and (max-width: 768px) {
@@ -124,5 +151,11 @@
 
     .js-listen {
         display: none;
+    }
+
+    #map-general-infos > div:last-child {
+        -webkit-box-flex: 1;
+        -ms-flex: 1 0 12rem;
+        flex: 1 0 12rem;
     }
 }

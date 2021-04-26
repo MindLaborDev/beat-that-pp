@@ -1,9 +1,10 @@
 
-
 .top-element {
     padding-top: 25vh;
     width: 50%;
     margin: auto;
+    -webkit-transition: padding-top 0.3s;
+    -o-transition: padding-top 0.3s;
     transition: padding-top 0.3s;
 }
 

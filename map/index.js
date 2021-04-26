@@ -111,7 +111,7 @@ function renderBasicMapInfos() {
                 ` : ``}
                 ${starData ? `
                     <div>
-                        <span class="key-2 u-text-ellipsis">Max pp</span><span class="value-2">${round(starData.pp)}</span>
+                        <span class="key-2 u-text-ellipsis">Max pp</span><span class="value-2">${round(starData.pp)} <i class="fab fa-pied-piper-pp"></i></span>
                     </div>
                 ` : ``}
                 <div>
