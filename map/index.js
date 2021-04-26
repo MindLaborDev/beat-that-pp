@@ -19,11 +19,14 @@ $(document).ready(async function () {
     }
 
     const key = args[0].substring(1);
+    document.title = "Fetching Map Details...";
 
     map = await API.getMapDetails(key);
     if (map === 404)
         return;
     console.log(map);
+    
+    document.title = `Deep Beat | ${map.name}`;
 
     // Download map
     progressElement = $("#progress");
