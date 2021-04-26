@@ -29,6 +29,7 @@
 
 #song-hero > .song-img {
     flex: 0 0 10rem;
+    margin-right: 1rem;
 }
 
 #song-hero > div > img {
@@ -47,8 +48,17 @@
 }
 
 #map-general-infos {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#map-general-infos > div:first-child {
+    min-width: 300px;
+    flex: 1;
+}
+
+#map-general-infos > div:last-child {
+    flex: 1 0 1;
 }
 
 .key-1 {
@@ -60,7 +70,7 @@
 
 .key-2 {
     display: inline-block;
-    flex: 0 0 10rem;
+    flex: 0 0 6rem;
     white-space: nowrap;
     overflow: hidden;
 }
@@ -86,4 +96,33 @@
 .date {
     font-size: 0.75rem;
     color: var(--cirrus-dark-gray);
+}
+
+.js-listen-mobile {
+    margin-top: 1rem;
+    display: none;
+}
+
+@media only screen and (max-width: 1200px) {
+    .top-element {
+        width: 70%;
+    }
+
+    #map-general-infos > div:last-child {
+        flex: 1 0 12rem;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    #install-btn-group {
+        display: none;
+    }
+
+    .js-listen-mobile {
+        display: block;
+    }
+
+    .js-listen {
+        display: none;
+    }
 }

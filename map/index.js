@@ -83,7 +83,7 @@ function renderBasicMapInfos() {
                     <span class="key-1 u-text-ellipsis">Duration</span><span class="value-1">${min}min ${sec}s</span>
                 </div>
                 <div>
-                    <span class="key-1 u-text-ellipsis">Author</span><span class="value-1">${data.infos._songAuthorName}</span>
+                    <span class="key-1 u-text-ellipsis">Artist</span><span class="value-1">${data.infos._songAuthorName}</span>
                 </div>
                 ${data.infos._songSubName ? `
                     <div>
@@ -106,7 +106,7 @@ function renderBasicMapInfos() {
             <div>
                 ${starData ? `
                     <div>
-                        <span class="key-2 u-text-ellipsis">Star difficulty</span><span class="value-2">${round(starData.stars)} <i class="fas fa-star"></i></span>
+                        <span class="key-2 u-text-ellipsis">Stars</span><span class="value-2">${round(starData.stars)} <i class="fas fa-star"></i></span>
                     </div>
                 ` : ``}
                 ${starData ? `
@@ -118,16 +118,16 @@ function renderBasicMapInfos() {
                     <span class="key-2 u-text-ellipsis">&nbsp;</span>
                 </div>
                 <div>
-                    <span class="key-2 u-text-ellipsis">Notes per second</span><span class="value-2">${round(data.mapData._notes.length / data.audio.duration)}</span>
+                    <span class="key-2 u-text-ellipsis">NPS</span><span class="value-2">${round(data.mapData._notes.length / data.audio.duration)}</span>
                 </div>
                 <div>
-                    <span class="key-2 u-text-ellipsis">Note speed (njs)</span><span class="value-2">${round(data.maps[difficulty]._noteJumpMovementSpeed)}</span>
+                    <span class="key-2 u-text-ellipsis">NJS</span><span class="value-2">${round(data.maps[difficulty]._noteJumpMovementSpeed)}</span>
                 </div>
                 <div>
-                    <span class="key-2 u-text-ellipsis">Note start offset</span><span class="value-2">${round(data.maps[difficulty]._noteJumpStartBeatOffset)}</span>
+                    <span class="key-2 u-text-ellipsis">Offset</span><span class="value-2">${round(data.maps[difficulty]._noteJumpStartBeatOffset)}</span>
                 </div>
                 <div>
-                    <span class="key-2 u-text-ellipsis">Beats per minute</span><span class="value-2">${round(data.infos._beatsPerMinute)}</span>
+                    <span class="key-2 u-text-ellipsis">BPM</span><span class="value-2">${round(data.infos._beatsPerMinute)}</span>
                 </div>
             </div>
         </div>
@@ -168,7 +168,8 @@ function renderDifficultyMenu(beatmap) {
 function renderSongHero(data) {
     $("#song-hero").html(`
         <div class="song-img">
-            <img class="u-circle" src="${data.cover}" />
+            <img class="u-circle u-center" src="${data.cover}" />
+            <button class="js-listen-mobile btn-small u-center" onclick="listen(this)">listen</button>
         </div>
         <div>
             <h4>${data.title}</h4>
@@ -178,7 +179,7 @@ function renderSongHero(data) {
                 ${data.dislikes} <i class="fas fa-heart-broken"></i>
             </span>
         </div>
-        <div class="song-footer">
+        <div class="song-footer" id="install-btn-group">
             <div class="my-2">
             <div class="list-dropdown">
                 <div class="btn-group">
