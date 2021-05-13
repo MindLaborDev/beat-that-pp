@@ -153,7 +153,6 @@ function renderBasicMapInfos() {
 
     $("#map-general-info-wrapper").html(`
         <!-- https://cdn.wes.cloud/beatstar/bssb/v2-all.json -->
-        Version <span>${convertDate(map.uploaded)}</span> <span class="date pl-1">(${data.infos._version})</span><br />
         ${requires}<br />
 
         <div id="map-general-infos">
@@ -257,7 +256,7 @@ function renderSongHero(data) {
         </div>
         <div>
             <h4>${data.title}</h4>
-            <p>Uploaded by ${data.mapper}</p>
+            <p class="tooltip tooltip--bottom" data-tooltip="${convertDate(map.uploaded)}" style="width: fit-content;">Uploaded by ${data.mapper}</p>
             <span>
                 ${data.likes} <i class="fas fa-heart"></i> &nbsp;&nbsp;
                 ${data.dislikes} <i class="fas fa-heart-broken"></i>
