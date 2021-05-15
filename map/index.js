@@ -27,7 +27,7 @@ $(document).ready(async function () {
     if (map === 404)
         return;
     console.log(map);
-    
+
     document.title = `Deep Beat | ${map.name}`;
 
     // Download map
@@ -63,19 +63,21 @@ $(document).ready(async function () {
 
 })
 
-
+let measureAccuracy = 5;
 function getNPMHistory() {
 
+    let mins = ~~(~~data.audio.duration / 60);
     let historyItems = [];
     let lastSongChunkIndex = Infinity;
     let currentNoteCount = 0;
+    measureAccuracy = (~~(mins/3.5) + 1) * 5;
 
     for (const note of analysedBeatmap.notes) {
-        let currentSongChunkIndex = ~~(note._time * 60 / analysedBeatmap.bpm / 5);
+        let currentSongChunkIndex = ~~(note._time * 60 / analysedBeatmap.bpm / measureAccuracy);
 
         if (lastSongChunkIndex !== currentSongChunkIndex) {
             lastSongChunkIndex = currentSongChunkIndex;
-            historyItems.push(currentNoteCount / 5);
+            historyItems.push(currentNoteCount / measureAccuracy);
             currentNoteCount = 1;
             continue;
         }
@@ -91,18 +93,18 @@ function setupCharts(npmHistory) {
 
     let seconds = 0;
     let labels = [];
-    for (const npmItem of npmHistory) {
-        seconds += 5;
-        labels.push(seconds + "s");
+    for (const _ of npmHistory) {
+        seconds += measureAccuracy;
+        labels.push(formatSecondsToTime(seconds));
     }
-    
+
     const ctx = document.getElementById('chart');
     chart = new Chart(ctx, {
         type: 'line',
         data: {
             labels,
             datasets: [{
-                label: 'Notes per second',
+                label: 'NPS',
                 data: npmHistory,
                 backgroundColor: '#f03d4d',
                 borderColor: '#f03d4d',
@@ -246,6 +248,12 @@ function renderDifficultyMenu(beatmap) {
 
     $("#difficulty-menu").html(`<ul>${html}</ul>`);
     $("#difficulty-menu").removeClass("not-loaded");
+}
+
+function formatSecondsToTime(sec) {
+    let min = ~~(sec / 60);
+    let s = sec % 60;
+    return `${min < 10 ? "0" + min : min}:${s < 10 ? "0" + s : s}`;
 }
 
 function renderSongHero(data) {
@@ -490,7 +498,7 @@ class Saber {
 
         // Set starting position
         this.position = BeatMap.getNoteBehind(initialChunk[0]._lineIndex, initialChunk[0]._lineLayer, initialChunk[0]._cutDirection);
-        
+
     }
 
 
@@ -529,7 +537,7 @@ class BeatMap {
         for (const chunk of this.chunkedDataRight) {
             if (saberPath.length === 1)
                 saberPath[0].time = 0;
-            
+
             const orderedChunk = this.orderChunk(chunk, saber.position);
             saber.traverse(orderedChunk);
             orderedChunk.path.shift();
