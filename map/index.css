@@ -100,6 +100,11 @@
     overflow: hidden;
 }
 
+#trend-description .key-2 {
+    -ms-flex: 0 0 9rem;
+    flex: 0 0 9rem;
+}
+
 #map-general-infos > div > div {
     display: -webkit-box;
     display: -ms-flexbox;

@@ -11,8 +11,8 @@ function clean(string) {
 /**
  * Round a number to 2 decimal points
  */
-function round(number) {
-    return ~~(number * 100) / 100;
+function round(number, n=2) {
+    return ~~(number * Math.pow(10, n)) / Math.pow(10, n);
 }
 
 

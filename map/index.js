@@ -10,6 +10,8 @@ let data;
 let map;
 let chart;
 let analysedBeatmap;
+let historyMode = "nps";
+const CHART_OPACITY = "66";
 $(document).ready(async function () {
 
     const args = location.hash.split(",");
@@ -42,7 +44,9 @@ $(document).ready(async function () {
     data = await decodeZippedMap(blob, zip.endsWith(".audica"));
     console.log(data);
 
+    console.log(data.infos._beatsPerMinute)
     analysedBeatmap = new BeatMap(data.mapData, data.infos._beatsPerMinute);
+    //console.log(analysedBeatmap);
 
     // Show song informations
     renderSongHero({
@@ -60,20 +64,118 @@ $(document).ready(async function () {
 
     const npmHistory = getNPMHistory();
     setupCharts(npmHistory);
-
+    toggleTrend(historyMode);
 })
+
+
+function getComplexityHistory() {
+    analysedBeatmap.analyseSaberPath();
+
+    // Readability feature -> cross hands
+
+    // Get angles of hitting notes
+    let angles = [];
+    let lastSpeed = 0;
+    for (let i = 1; i<analysedBeatmap.rightSaberPath.length - 1; i++) {
+        const prev = analysedBeatmap.rightSaberPath[i - 1];
+        const curr = analysedBeatmap.rightSaberPath[i];
+        const next = analysedBeatmap.rightSaberPath[i + 1];
+        const angle = BeatMap.getAngleBetweenVectors(curr.x - prev.x, curr.y - prev.y, next.x - curr.x, next.y - curr.y);
+        const dist = Math.sqrt((curr.x - next.x) * (curr.x - next.x) + (curr.y - next.y) * (curr.y - next.y));
+        const dT = next.time - curr.time;
+        const speed = dist / dT;
+        
+        angles.push({
+            angle: round(angle / (2 * Math.PI), 4),
+            time: curr.time,
+            speed: dT >= 0.03? speed : lastSpeed,
+            note: curr
+        });
+
+        if (dT >= 0.03) 
+            lastSpeed = speed;
+    }
+
+    // Get angle change (acceleration) between notes
+    let lastAngle;
+    let dAngles = [];
+    let skippedAngles = 0;
+    for (const angle of angles) {
+        if (lastAngle) {
+            if (angle.angle <= 0.1) {
+                skippedAngles++;
+                continue;
+            }
+            dAngles.push({
+                angle: Math.abs(angle.angle - lastAngle.angle) * 1.5,
+                skippedAngles,
+                time: angle.time,
+                speed: angle.speed,
+                note: angle.note
+            });
+            skippedAngles = 0;
+        }
+        lastAngle = angle;
+    }
+
+    // Calc average angle change and build history for graph
+    let lastSongChunkIndex = Infinity;
+    let angleHistoryItems = [], speedHistoryItems = [], complexityHistoryItems = [];
+    let currentAngleAvg = 0, currentSpeedAvg = 0, currentComplexityAvg = 0;
+    let noteCount = 0;
+    for (const angle of dAngles) {
+        let currentSongChunkIndex = ~~(angle.time * 60 / measureAccuracy);
+
+        if (lastSongChunkIndex !== currentSongChunkIndex) {
+            lastSongChunkIndex = currentSongChunkIndex;
+
+            // Vision blockers make it harder to see the notes
+            let offset = data.maps[difficulty]._noteJumpStartBeatOffset + 3;
+            offset = offset < 0.1? 0.1 : offset;
+            const VISION_BLOCKER_WEIGHT = 0.4;
+            const beatA = angle.time * data.infos._beatsPerMinute / 60;
+            const beatB = (angle.time + offset) * data.infos._beatsPerMinute / 60;
+            const blockers = analysedBeatmap.getVisionBlockers(beatA, beatB);
+            let rightBlockerValue = blockers.right.length * VISION_BLOCKER_WEIGHT;
+            if (blockers.left.length > 0 && blockers.right.length > 0) {
+                rightBlockerValue += VISION_BLOCKER_WEIGHT;
+            }
+
+            console.log(angle.skippedAngles, currentAngleAvg)
+            angleHistoryItems.push(noteCount === 0? 0 : currentAngleAvg * 8 / noteCount);
+            speedHistoryItems.push(noteCount === 0? 0 : currentSpeedAvg * 1.5 / noteCount);
+            complexityHistoryItems.push(noteCount === 0? 0 : currentComplexityAvg * (1 + rightBlockerValue) * 4 / noteCount);
+
+            currentAngleAvg = 0;
+            currentSpeedAvg = 0;
+            currentComplexityAvg = 0;
+            noteCount = 0;
+        }
+
+        currentAngleAvg += angle.angle + angle.skippedAngles * 0.2;
+        currentSpeedAvg += angle.speed;
+        currentComplexityAvg += angle.speed * (angle.angle + angle.skippedAngles * 0.2);
+        noteCount++;
+    }
+    
+    return {
+        angleHistoryItems,
+        speedHistoryItems,
+        complexityHistoryItems
+    };
+}
 
 let measureAccuracy = 5;
 function getNPMHistory() {
 
-    let mins = ~~(~~data.audio.duration / 60);
+    let mins = data.audio.duration / 60;
     let historyItems = [];
     let lastSongChunkIndex = Infinity;
     let currentNoteCount = 0;
-    measureAccuracy = (~~(mins/3.5) + 1) * 5;
+    measureAccuracy = ~~((mins/2 + 1) * 5);
 
     for (const note of analysedBeatmap.notes) {
-        let currentSongChunkIndex = ~~(note._time * 60 / analysedBeatmap.bpm / measureAccuracy);
+        let currentSongChunkIndex = ~~(note._time * 60 / data.infos._beatsPerMinute / measureAccuracy);
 
         if (lastSongChunkIndex !== currentSongChunkIndex) {
             lastSongChunkIndex = currentSongChunkIndex;
@@ -94,8 +196,8 @@ function setupCharts(npmHistory) {
     let seconds = 0;
     let labels = [];
     for (const _ of npmHistory) {
-        seconds += measureAccuracy;
         labels.push(formatSecondsToTime(seconds));
+        seconds += measureAccuracy;
     }
 
     const ctx = document.getElementById('chart');
@@ -106,21 +208,20 @@ function setupCharts(npmHistory) {
             datasets: [{
                 label: 'NPS',
                 data: npmHistory,
-                backgroundColor: '#f03d4d',
+                backgroundColor: '#f03d4d' + CHART_OPACITY,
                 borderColor: '#f03d4d',
-                borderWidth: 1
+                borderWidth: 1,
+                fill: true
             }]
         },
         options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            },
             elements: {
                 line: {
                     tension: 0.2,
                     cubicInterpolationMode: "monotone"
+                },
+                point: {
+                    radius: 0
                 }
             },
             normalized: true,
@@ -133,9 +234,7 @@ function setupCharts(npmHistory) {
 
 function rerenderCharts() {
     analysedBeatmap = new BeatMap(data.mapData, data.infos._beatsPerMinute);
-    const npmHistory = getNPMHistory();
-    chart.data.datasets[0].data = npmHistory;
-    chart.update();
+    toggleTrend(historyMode);
 }
 
 function renderBasicMapInfos() {
@@ -215,6 +314,60 @@ function renderBasicMapInfos() {
             </div>
         </div>
     `);
+
+}
+
+
+function toggleTrend(mode) {
+    switch (mode) {
+        case 'nps':
+            $("#trend-description").html(`
+                <p></p>
+            `);
+            const npmHistory = getNPMHistory();
+            chart.data.datasets = [{
+                label: 'NPS',
+                data: npmHistory,
+                backgroundColor: '#f03d4d' + CHART_OPACITY,
+                borderColor: '#f03d4d',
+                borderWidth: 1,
+                fill: true
+            }];
+            chart.update();
+            break;
+        case 'comp':
+            const vBlockers = analysedBeatmap.getVisionBlockers(-Infinity, Infinity);
+            const complexityHistory = getComplexityHistory();
+            chart.data.datasets = [{
+                label: 'Complexity',
+                data: complexityHistory.complexityHistoryItems,
+                backgroundColor: '#f03d4d',
+                borderColor: '#f03d4d',
+                borderWidth: 1
+            },{
+                label: 'Readability (beta)',
+                data: complexityHistory.angleHistoryItems,
+                backgroundColor: '#5e5cc7' + CHART_OPACITY,
+                borderColor: '#5e5cc7',
+                borderWidth: 1,
+                fill: true
+            },{
+                label: 'Speed',
+                data: complexityHistory.speedHistoryItems,
+                backgroundColor: '#0dd157' + CHART_OPACITY,
+                borderColor: '#0dd157',
+                borderWidth: 1,
+                fill: true
+            }];
+            chart.update();
+            $("#trend-description").html(`
+                <p></p>
+                <div class="u-flex">
+                    <span class="key-2 u-text-ellipsis">Vision Blockers</span><span class="value-2">${vBlockers.left.length + vBlockers.right.length}</span>
+                </div>
+            `);
+            break;
+    }
 }
 
 async function selectDifficulty(difficultyRank) {
@@ -511,8 +664,7 @@ class Saber {
 
 class BeatMap {
 
-    constructor(rawData, bpm) {
-        this.bpm = bpm;
+    constructor(rawData) {
         this.notes = rawData._notes.filter(n => n._type !== 3);
         this.leftNotes = this.notes.filter(n => n._type === 0);
         this.rightNotes = this.notes.filter(n => n._type === 1);
@@ -521,13 +673,29 @@ class BeatMap {
         this.chunkedDataLeft = this.normalize(this.leftNotes);
         this.chunkedDataRight = this.normalize(this.rightNotes);
 
+        this.leftBlockers = this.notes.filter(n => n._lineIndex === 1 && n._lineLayer === 1);
+        this.rightBlockers = this.notes.filter(n => n._lineIndex === 2 && n._lineLayer === 1);
+    }
+
+
+    getVisionBlockers(from, to) {
+    
+        const leftBlockers = this.leftBlockers.filter(n => n._time > from && n._time < to);
+        const rightBlockers = this.rightBlockers.filter(n => n._time > from && n._time < to);
+
+        return {
+            left: leftBlockers,
+            right: rightBlockers
+        }
+
+    }
+
+
+    analyseSaberPath() {
         const rightSaber = new Saber(this.chunkedDataRight[0]);
-        const rightSaberPath = this.determineSaberPath(rightSaber);
-
         const leftSaber = new Saber(this.chunkedDataLeft[0]);
-        const leftSaberPath = this.determineSaberPath(leftSaber);
-
-        //console.log(rightSaberPath);
+        this.rightSaberPath = this.determineSaberPath(rightSaber);
+        this.leftSaberPath = this.determineSaberPath(leftSaber);
     }
 
 
@@ -629,7 +797,7 @@ class BeatMap {
             const dYA = uniqueTraversal[i + 1].y - uniqueTraversal[i].y;
             const dXB = uniqueTraversal[i + 2].x - uniqueTraversal[i + 1].x;
             const dYB = uniqueTraversal[i + 2].y - uniqueTraversal[i + 1].y;
-            const dA = this.getAngleBetweenVectors(dXA, dYA, dXB, dYB);
+            const dA = BeatMap.getAngleBetweenVectors(dXA, dYA, dXB, dYB);
             totalAngleChanges += dA;
         }
 
@@ -640,8 +808,9 @@ class BeatMap {
     }
 
 
-    getAngleBetweenVectors(x1, y1, x2, y2) {
-        return Math.acos((x1 * x2 + y1 * y2) / (Math.sqrt(x1 * x1 + y1 * y1) * Math.sqrt(x2 * x2 + y2 * y2)));
+    static getAngleBetweenVectors(x1, y1, x2, y2) {
+        const angle = Math.acos((x1 * x2 + y1 * y2) / (Math.sqrt(x1 * x1 + y1 * y1) * Math.sqrt(x2 * x2 + y2 * y2)));
+        return angle < 0.001? 0 : angle;
     }
 
 
@@ -751,8 +920,8 @@ class BeatMap {
 
 
     static beatToTime(beat) {
-        //console.log(this.bpm);
-        return +beat * 60 / +this.bpm;
+        //console.log(data.infos._beatsPerMinute);
+        return +beat * 60 / data.infos._beatsPerMinute;
     }
 
 
