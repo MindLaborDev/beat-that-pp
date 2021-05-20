@@ -316,18 +316,7 @@ function getAngleBetweenDirectionCodes(noteA, noteB) {
     const angles = [0, .5, .25, .25, .125, .125, .375, .375, 0];
     let dirA = noteA._cutDirection;
     let dirB = noteB._cutDirection;
-
-    // If the first block is not in the middle the player will probably hit it from the inside
-    // As there are no blocks outside the 3x3 area (not always though, but thats just a tradeoff for simplicity)
-    if (noteA._cutDirection === 8)
-        return (noteA._lineIndex === 1 || noteA._lineIndex === 2) && noteA._lineLayer === 1 ? .25 : .6;
-
-    if (noteB._cutDirection === 8)
-        return (noteB._lineIndex === 1 || noteB._lineIndex === 2) && noteB._lineLayer === 1 ? .25 : .6;
-
-
-    // 1.3 is an approximate factor that makes the distance between notes bigger due to a curvature
-    // in the saber movement
+    
     return Math.abs(angles[dirB] - angles[dirA]) + .5;
 }
 

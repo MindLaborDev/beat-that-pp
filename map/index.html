@@ -39,14 +39,19 @@
             <div class="tab-container tabs-classic tabs-center" id="stats-menu">
                 <ul>
                     <li onclick="toggleTrend('nps')">
-                        <div class="tab-item-content">Notes per second</div>
+                        <div class="tab-item-content">NPS</div>
                     </li>
                     <li onclick="toggleTrend('comp')">
                         <div class="tab-item-content">Complexity</div>
                     </li>
+                    <li onclick="toggleTrend('speed')">
+                        <div class="tab-item-content">Speed</div>
+                    </li>
+                    <li onclick="toggleTrend('wrists')">
+                        <div class="tab-item-content">Wrists</div>
+                    </li>
                 </ul>
             </div>
-            <div id="trend-description"></div>
             <canvas id="chart"></canvas>
         </div>
     </div>

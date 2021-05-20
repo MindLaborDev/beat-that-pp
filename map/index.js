@@ -11,6 +11,7 @@ let map;
 let chart;
 let analysedBeatmap;
 let historyMode = "nps";
+let histories = {};
 const CHART_OPACITY = "66";
 $(document).ready(async function () {
 
@@ -60,10 +61,10 @@ $(document).ready(async function () {
     })
 
     renderDifficultyMenu(data.beatmap);
+    analyseMapStructure();
     renderBasicMapInfos();
 
-    const npmHistory = getNPMHistory();
-    setupCharts(npmHistory);
+    setupCharts();
     toggleTrend(historyMode);
 })
 
@@ -76,7 +77,7 @@ function getComplexityHistory() {
     // Get angles of hitting notes
     let angles = [];
     let lastSpeed = 0;
-    for (let i = 1; i<analysedBeatmap.rightSaberPath.length - 1; i++) {
+    for (let i = 1; i < analysedBeatmap.rightSaberPath.length - 1; i++) {
         const prev = analysedBeatmap.rightSaberPath[i - 1];
         const curr = analysedBeatmap.rightSaberPath[i];
         const next = analysedBeatmap.rightSaberPath[i + 1];
@@ -84,15 +85,16 @@ function getComplexityHistory() {
         const dist = Math.sqrt((curr.x - next.x) * (curr.x - next.x) + (curr.y - next.y) * (curr.y - next.y));
         const dT = next.time - curr.time;
         const speed = dist / dT;
-        
+        const endSpeed = dT >= 0.03 ? speed : lastSpeed;
+
         angles.push({
             angle: round(angle / (2 * Math.PI), 4),
             time: curr.time,
-            speed: dT >= 0.03? speed : lastSpeed,
+            speed: endSpeed,
             note: curr
         });
 
-        if (dT >= 0.03) 
+        if (dT >= 0.03)
             lastSpeed = speed;
     }
 
@@ -131,7 +133,7 @@ function getComplexityHistory() {
 
             // Vision blockers make it harder to see the notes
             let offset = data.maps[difficulty]._noteJumpStartBeatOffset + 3;
-            offset = offset < 0.1? 0.1 : offset;
+            offset = offset < 0.1 ? 0.1 : offset;
             const VISION_BLOCKER_WEIGHT = 0.4;
             const beatA = angle.time * data.infos._beatsPerMinute / 60;
             const beatB = (angle.time + offset) * data.infos._beatsPerMinute / 60;
@@ -141,10 +143,9 @@ function getComplexityHistory() {
                 rightBlockerValue += VISION_BLOCKER_WEIGHT;
             }
 
-            console.log(angle.skippedAngles, currentAngleAvg)
-            angleHistoryItems.push(noteCount === 0? 0 : currentAngleAvg * 8 / noteCount);
-            speedHistoryItems.push(noteCount === 0? 0 : currentSpeedAvg * 1.5 / noteCount);
-            complexityHistoryItems.push(noteCount === 0? 0 : currentComplexityAvg * (1 + rightBlockerValue) * 4 / noteCount);
+            angleHistoryItems.push(noteCount === 0 ? 0 : currentAngleAvg * 8 / noteCount);
+            speedHistoryItems.push(noteCount === 0 ? 0 : currentSpeedAvg * 1 / noteCount);
+            complexityHistoryItems.push(noteCount === 0 ? 0 : currentComplexityAvg * (1 + rightBlockerValue) * 4 / noteCount);
 
             currentAngleAvg = 0;
             currentSpeedAvg = 0;
@@ -157,7 +158,7 @@ function getComplexityHistory() {
         currentComplexityAvg += angle.speed * (angle.angle + angle.skippedAngles * 0.2);
         noteCount++;
     }
-    
+
     return {
         angleHistoryItems,
         speedHistoryItems,
@@ -166,36 +167,40 @@ function getComplexityHistory() {
 }
 
 let measureAccuracy = 5;
-function getNPMHistory() {
-
+function determineDistribution(items, multiplier) {
     let mins = data.audio.duration / 60;
     let historyItems = [];
     let lastSongChunkIndex = Infinity;
     let currentNoteCount = 0;
-    measureAccuracy = ~~((mins/2 + 1) * 5);
+    measureAccuracy = ~~((mins / 2 + 1) * 5);
 
-    for (const note of analysedBeatmap.notes) {
-        let currentSongChunkIndex = ~~(note._time * 60 / data.infos._beatsPerMinute / measureAccuracy);
+    for (const item of items) {
+        let currentSongChunkIndex = ~~(item._time * 60 / data.infos._beatsPerMinute / measureAccuracy);
 
         if (lastSongChunkIndex !== currentSongChunkIndex) {
             lastSongChunkIndex = currentSongChunkIndex;
-            historyItems.push(currentNoteCount / measureAccuracy);
+            historyItems.push(currentNoteCount * multiplier / measureAccuracy);
             currentNoteCount = 1;
             continue;
         }
 
-        currentNoteCount++;
+        currentNoteCount += item.value == null? 1 : item.value;
+    }
+
+    let dataPoints = Math.ceil(data.audio.duration / measureAccuracy);
+    while (historyItems.length < dataPoints) {
+        historyItems.push(0);
     }
 
     return historyItems;
 }
 
 
-function setupCharts(npmHistory) {
+function setupCharts() {
 
     let seconds = 0;
     let labels = [];
-    for (const _ of npmHistory) {
+    for (const _ of histories.npm) {
         labels.push(formatSecondsToTime(seconds));
         seconds += measureAccuracy;
     }
@@ -207,7 +212,7 @@ function setupCharts(npmHistory) {
             labels,
             datasets: [{
                 label: 'NPS',
-                data: npmHistory,
+                data: histories.npm,
                 backgroundColor: '#f03d4d' + CHART_OPACITY,
                 borderColor: '#f03d4d',
                 borderWidth: 1,
@@ -234,7 +239,21 @@ function setupCharts(npmHistory) {
 
 function rerenderCharts() {
     analysedBeatmap = new BeatMap(data.mapData, data.infos._beatsPerMinute);
+
+    analyseMapStructure();
     toggleTrend(historyMode);
+}
+
+function analyseMapStructure() {
+    const complexityHistory = getComplexityHistory();
+    const vBlockers = analysedBeatmap.getVisionBlockers(-Infinity, Infinity);
+    const npmHistory = determineDistribution(analysedBeatmap.notes, 1);
+    const jumps = analysedBeatmap.getJumps();
+
+    histories.jumps = jumps;
+    histories.npm = npmHistory;
+    histories.blockers = vBlockers;
+    histories.complexity = complexityHistory;
 }
 
 function renderBasicMapInfos() {
@@ -284,6 +303,15 @@ function renderBasicMapInfos() {
                 <div>
                     <span class="key-1 u-text-ellipsis">Bombs</span><span class="value-1">${data.mapData._bombs.length}</span>
                 </div>
+                <div>
+                    <span class="key-2 u-text-ellipsis">&nbsp;</span>
+                </div>
+                <div>
+                    <span class="key-3 u-text-ellipsis">Estimated jumps</span><span class="value-1">${histories.jumps.jumpsCount}</span>
+                </div>
+                <div>
+                    <span class="key-3 u-text-ellipsis">Vision blockers</span><span class="value-1">${histories.blockers.left.length + histories.blockers.right.length}</span>
+                </div>
             </div>
             <div>
                 ${starData ? `
@@ -319,15 +347,13 @@ function renderBasicMapInfos() {
 
 
 function toggleTrend(mode) {
+    historyMode = mode;
+
     switch (mode) {
         case 'nps':
-            $("#trend-description").html(`
-                <p></p>
-            `);
-            const npmHistory = getNPMHistory();
             chart.data.datasets = [{
                 label: 'NPS',
-                data: npmHistory,
+                data: histories.npm,
                 backgroundColor: '#f03d4d' + CHART_OPACITY,
                 borderColor: '#f03d4d',
                 borderWidth: 1,
@@ -336,38 +362,54 @@ function toggleTrend(mode) {
             chart.update();
             break;
         case 'comp':
-            const vBlockers = analysedBeatmap.getVisionBlockers(-Infinity, Infinity);
-            const complexityHistory = getComplexityHistory();
             chart.data.datasets = [{
                 label: 'Complexity',
-                data: complexityHistory.complexityHistoryItems,
+                data: histories.complexity.complexityHistoryItems,
                 backgroundColor: '#f03d4d',
                 borderColor: '#f03d4d',
                 borderWidth: 1
-            },{
+            }, {
                 label: 'Readability (beta)',
-                data: complexityHistory.angleHistoryItems,
+                data: histories.complexity.angleHistoryItems,
                 backgroundColor: '#5e5cc7' + CHART_OPACITY,
                 borderColor: '#5e5cc7',
                 borderWidth: 1,
                 fill: true
-            },{
+            }];
+            chart.update();
+            break;
+        case 'speed':
+            chart.data.datasets = [{
                 label: 'Speed',
-                data: complexityHistory.speedHistoryItems,
-                backgroundColor: '#0dd157' + CHART_OPACITY,
-                borderColor: '#0dd157',
+                data: histories.complexity.speedHistoryItems,
+                backgroundColor: '#5e5cc7' + CHART_OPACITY,
+                borderColor: '#5e5cc7',
                 borderWidth: 1,
                 fill: true
             }];
             chart.update();
-            $("#trend-description").html(`
-                <p></p>
-                <div class="u-flex">
-                    <span class="key-2 u-text-ellipsis">Vision Blockers</span><span class="value-2">${vBlockers.left.length + vBlockers.right.length}</span>
-                </div>
-            `);
+            break;
+        case 'wrists':
+            chart.data.datasets = [{
+                label: 'Wrists',
+                data: histories.jumps.wrists,
+                backgroundColor: '#0dd157' + CHART_OPACITY,
+                borderColor: '#0dd157',
+                borderWidth: 1,
+                fill: true
+            }, {
+                label: 'Jumps',
+                data: histories.jumps.historyItems,
+                backgroundColor: '#fdd157' + CHART_OPACITY,
+                borderColor: '#fdd157',
+                borderWidth: 1,
+                fill: true
+            }];
+            chart.update();
             break;
     }
+
+    console.log("Histories", histories);
 }
 
 async function selectDifficulty(difficultyRank) {
@@ -675,11 +717,77 @@ class BeatMap {
 
         this.leftBlockers = this.notes.filter(n => n._lineIndex === 1 && n._lineLayer === 1);
         this.rightBlockers = this.notes.filter(n => n._lineIndex === 2 && n._lineLayer === 1);
+
+        this.sortedRightNotes = this.chunkedDataRight.flat();
+        this.sortedLeftNotes = this.chunkedDataLeft.flat();
+    }
+
+
+    getJumps() {
+
+        let jumps = {
+            left: [],
+            right: []
+        };
+        let wristsUsage = [];
+        for (let i = 0; i < this.sortedRightNotes.length - 1; i++) {
+
+            const dA = BeatMap.getAngleBetweenDirectionCodes(this.sortedRightNotes[i], this.sortedRightNotes[i + 1])
+            const dX = this.sortedRightNotes[i]._lineIndex - this.sortedRightNotes[i + 1]._lineIndex;
+            const dY = this.sortedRightNotes[i]._lineLayer - this.sortedRightNotes[i + 1]._lineLayer;
+            const dBeat = this.sortedRightNotes[i + 1]._time - this.sortedRightNotes[i]._time;
+            const dTime = BeatMap.beatToTime(dBeat);
+            const dist = Math.sqrt(dX * dX + dY * dY);
+
+            if (((dA > .374 && dist > 2.5) || (dist > 1.9 && dA >= .49)) && dTime < .15) {
+                jumps.right.push(this.sortedRightNotes[i]);
+                wristsUsage.push(Object.assign(this.sortedRightNotes[i], {
+                    value: dist * ((.3 - dTime) * 6) + (.5 - dA)
+                }));
+            }
+        }
+
+        for (let i = 0; i < this.sortedLeftNotes.length - 1; i++) {
+
+            const dA = BeatMap.getAngleBetweenDirectionCodes(this.sortedLeftNotes[i], this.sortedLeftNotes[i + 1])
+            const dX = this.sortedLeftNotes[i]._lineIndex - this.sortedLeftNotes[i + 1]._lineIndex;
+            const dY = this.sortedLeftNotes[i]._lineLayer - this.sortedLeftNotes[i + 1]._lineLayer;
+            const dBeat = this.sortedLeftNotes[i + 1]._time - this.sortedLeftNotes[i]._time;
+            const dTime = BeatMap.beatToTime(dBeat);
+            const dist = Math.sqrt(dX * dX + dY * dY);
+
+            if (((dA > .374 && dist > 2.5) || (dist > 1.9 && dA >= .49)) && dTime < .15) {
+                jumps.left.push(this.sortedLeftNotes[i]);
+                wristsUsage.push(Object.assign(this.sortedLeftNotes[i], {
+                    value: dist * ((.3 - dTime) * 6) + (.5 - dA)
+                }));
+            }
+        }
+
+        // Filter out alone standing jumps and keep jumps in streams
+        const allJumps = jumps.right.concat(jumps.left).sort((a, b) => a._time - b._time);
+        let lastJumpTime = 0;
+        let jumpStreams = [];
+        for (const jumpNote of allJumps) {
+
+            const currentJumpTime = BeatMap.beatToTime(jumpNote._time);
+            if ((currentJumpTime - lastJumpTime) < 0.5) {
+                jumpStreams.push(jumpNote);
+            }
+
+            lastJumpTime = currentJumpTime;
+        }
+
+        return {
+            historyItems: determineDistribution(jumpStreams, 1),
+            wrists: determineDistribution(wristsUsage, 2),
+            jumpsCount: jumpStreams.length
+        }
     }
 
 
     getVisionBlockers(from, to) {
-    
+
         const leftBlockers = this.leftBlockers.filter(n => n._time > from && n._time < to);
         const rightBlockers = this.rightBlockers.filter(n => n._time > from && n._time < to);
 
@@ -717,14 +825,10 @@ class BeatMap {
 
     orderChunk(chunk, saberPosition) {
 
-        //console.log("Chunk");
-
         let minAngle = Infinity;
         let bestPermutation, bestTraversal;
         const chunkPermutations = this.permutations(chunk);
         for (const permutation of chunkPermutations) {
-            //console.log(permutation[0]._time);
-            //console.log(permutation.map(n => `${n._lineIndex} : ${n._lineLayer} (${n._cutDirection})`));
 
             const position = saberPosition || {
                 x: permutation[0]._lineIndex,
@@ -732,8 +836,6 @@ class BeatMap {
             };
 
             const traversalResults = this.traverseChunk(permutation, position);
-            //console.log(traversalResults);
-            //console.log();
             if (minAngle > traversalResults.sumAngle) {
                 minAngle = traversalResults.sumAngle;
                 bestTraversal = traversalResults.traversal;
@@ -810,7 +912,7 @@ class BeatMap {
 
     static getAngleBetweenVectors(x1, y1, x2, y2) {
         const angle = Math.acos((x1 * x2 + y1 * y2) / (Math.sqrt(x1 * x1 + y1 * y1) * Math.sqrt(x2 * x2 + y2 * y2)));
-        return angle < 0.001? 0 : angle;
+        return angle < 0.001 ? 0 : angle;
     }
 
 
@@ -884,6 +986,17 @@ class BeatMap {
     }
 
 
+    static getAngleBetweenDirectionCodes(noteA, noteB) {
+
+        // Get angle difference
+        const angles = [0, .5, .25, .25, .125, .125, .375, .375, 0];
+        let dirA = noteA._cutDirection;
+        let dirB = noteB._cutDirection;
+
+        return Math.abs(angles[dirB] - angles[dirA]);
+    }
+
+
     /**
      * Returns all permutation of a given array (without repetition)
      */
@@ -920,7 +1033,6 @@ class BeatMap {
 
 
     static beatToTime(beat) {
-        //console.log(data.infos._beatsPerMinute);
         return +beat * 60 / data.infos._beatsPerMinute;
     }
 
