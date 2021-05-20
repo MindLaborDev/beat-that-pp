@@ -10,7 +10,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/cirrus-ui">
-    <link rel="stylesheet" type="text/css" href="/map/index.css">
+    <link rel="stylesheet" type="text/css" href="/index.css">
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
         integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
 </head>
@@ -21,7 +21,7 @@
         <button class="u-position-absolute btn-primary ml-8 mt-8" style="top: 0px; left: 0px;">Back</button>
     </a>
 
-    <div class="top-element">
+    <div class="top-element-map">
         <div id="player" class="pt-16"></div>
         <div class="pb-8 pt-8">
             <div id="song-hero"></div>
@@ -36,19 +36,19 @@
         <div class="tab-container tabs-center not-loaded" id="difficulty-menu"></div>
         <div id="map-general-info-wrapper"></div>
         <div class="mt-8 pb-32 u-none" id="chart-wrapper">
-            <div class="tab-container tabs-classic tabs-center" id="stats-menu">
+            <div class="tab-container tabs-center" id="stats-menu">
                 <ul>
-                    <li onclick="toggleTrend('nps')">
+                    <li id="graph-toggle-nps" class="selected">
                         <div class="tab-item-content">NPS</div>
                     </li>
-                    <li onclick="toggleTrend('comp')">
-                        <div class="tab-item-content">Complexity</div>
-                    </li>
-                    <li onclick="toggleTrend('speed')">
+                    <li id="graph-toggle-speed">
                         <div class="tab-item-content">Speed</div>
                     </li>
-                    <li onclick="toggleTrend('wrists')">
+                    <li id="graph-toggle-wrists">
                         <div class="tab-item-content">Wrists</div>
+                    </li>
+                    <li id="graph-toggle-comp">
+                        <div class="tab-item-content">Complexity (beta)</div>
                     </li>
                 </ul>
             </div>
@@ -59,7 +59,6 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.min.js"></script>
     <script src="/vendor/jszip.min.js"></script>
-    <script src="/helper.js"></script>
     <script>
         const difficultyDisplayMap = {
             "ExpertPlus": "Expert+"
@@ -76,7 +75,7 @@
             9: "expertPlus"
         };
     </script>
-    <script src="/map/index.js"></script>
+    <script src="/map.js"></script>
 </body>
 
 </html>

@@ -1,5 +1,7 @@
 "use strict";
 
+const { API } = require("./helper");
+
 $(document).ready(function () 
 {
     const input = $("#key");

@@ -1,5 +1,12 @@
 "use strict";
 
+const {
+    round,
+    bytesToSize,
+    convertDate,
+    API
+} = require("./helper");
+
 let progressElement;
 let progressStatusElement;
 let progressMessageElement;
@@ -66,8 +73,22 @@ $(document).ready(async function () {
 
     setupCharts();
     toggleTrend(historyMode);
+    addToggleTrendListener();
 })
 
+
+function addToggleTrendListener() {
+    const toggleMenu = $("li[id^='graph-toggle-']");
+
+    toggleMenu.each((_, e) => {
+        $(e).click(event => {
+            const trendType = event.currentTarget.id.replace(/graph-toggle-/g, '');
+            $(toggleMenu).removeClass("selected");
+            $(event.currentTarget).addClass("selected");
+            toggleTrend(trendType);
+        })
+    });
+}
 
 function getComplexityHistory() {
     analysedBeatmap.analyseSaberPath();
@@ -184,7 +205,7 @@ function determineDistribution(items, multiplier) {
             continue;
         }
 
-        currentNoteCount += item.value == null? 1 : item.value;
+        currentNoteCount += item.value == null ? 1 : item.value;
     }
 
     let dataPoints = Math.ceil(data.audio.duration / measureAccuracy);
@@ -237,12 +258,6 @@ function setupCharts() {
     $("#chart-wrapper").removeClass("u-none");
 }
 
-function rerenderCharts() {
-    analysedBeatmap = new BeatMap(data.mapData, data.infos._beatsPerMinute);
-
-    analyseMapStructure();
-    toggleTrend(historyMode);
-}
 
 function analyseMapStructure() {
     const complexityHistory = getComplexityHistory();
@@ -307,10 +322,10 @@ function renderBasicMapInfos() {
                     <span class="key-2 u-text-ellipsis">&nbsp;</span>
                 </div>
                 <div>
-                    <span class="key-3 u-text-ellipsis">Estimated jumps</span><span class="value-1">${histories.jumps.jumpsCount}</span>
+                    <span class="key-3 u-text-ellipsis">Estimated jumps</span><span class="value-1" id="value-jumps">${histories.jumps.jumpsCount}</span>
                 </div>
                 <div>
-                    <span class="key-3 u-text-ellipsis">Vision blockers</span><span class="value-1">${histories.blockers.left.length + histories.blockers.right.length}</span>
+                    <span class="key-3 u-text-ellipsis">Vision blockers</span><span class="value-1" id="value-blockers">${histories.blockers.left.length + histories.blockers.right.length}</span>
                 </div>
             </div>
             <div>
@@ -408,9 +423,8 @@ function toggleTrend(mode) {
             chart.update();
             break;
     }
-
-    console.log("Histories", histories);
 }
+
 
 async function selectDifficulty(difficultyRank) {
     difficulty = difficultyRank;
@@ -425,12 +439,14 @@ async function selectDifficulty(difficultyRank) {
     data.mapData._bombs = data.mapData._notes.filter(n => n._type === 3);
     data.mapData._notes = data.mapData._notes.filter(n => n._type !== 3);
 
+    analysedBeatmap = new BeatMap(data.mapData, data.infos._beatsPerMinute);
+    analyseMapStructure();
     renderBasicMapInfos();
 
     $("#difficulty-menu li").removeClass("selected");
     $(`#difficulty-menu li[data-did="${difficulty}"]`).addClass("selected");
 
-    rerenderCharts();
+    toggleTrend(historyMode);
 }
 
 
@@ -438,11 +454,17 @@ function renderDifficultyMenu(beatmap) {
     const html = beatmap._difficultyBeatmaps.reduce((acc, cv) => {
         const selected = difficulty === cv._difficultyRank ? `class="selected"` : "";
         const d = cv._customData._difficultyLabel || difficultyDisplayMap[cv._difficulty] || cv._difficulty;
-        return acc + `<li data-did="${cv._difficultyRank}" ${selected} onclick="selectDifficulty(${cv._difficultyRank})"><div class="tab-item-content">${d}</div></li>`
+        return acc + `<li data-did="${cv._difficultyRank}" ${selected}><div class="tab-item-content">${d}</div></li>`
     }, "");
 
     $("#difficulty-menu").html(`<ul>${html}</ul>`);
     $("#difficulty-menu").removeClass("not-loaded");
+
+    beatmap._difficultyBeatmaps.forEach(e => {
+        $(`#difficulty-menu li[data-did="${e._difficultyRank}"]`).click(event => {
+            selectDifficulty($(event.currentTarget).data("did"));
+        });
+    });
 }
 
 function formatSecondsToTime(sec) {
@@ -455,7 +477,7 @@ function renderSongHero(data) {
     $("#song-hero").html(`
         <div class="song-img">
             <img class="u-circle u-center" src="${data.cover}" />
-            <button class="js-listen-mobile btn-small u-center" onclick="listen(this)">listen</button>
+            <button class="js-listen-mobile btn-small u-center listen-btn">listen</button>
         </div>
         <div>
             <h4>${data.title}</h4>
@@ -472,16 +494,29 @@ function renderSongHero(data) {
                     <button class="btn-primary" onclick="window.location.href = '${data.oneclick}';">Install</button>
                     <button class="btn-primary btn-small btn-dropdown"><i class="fa fa-wrapper fa-caret-down" aria-hidden="true"></i></button>
                     <ul class="menu">
-                        <li class="menu-item" onclick="downloadMap()"><a>Download Map</a></li>
-                        <li class="menu-item" onclick="copyTextToClipboard('!bsr ${map.key}')"><a>Copy !bsr</a></li>
+                        <li class="menu-item" id="download-map"><a>Download Map</a></li>
+                        <li class="menu-item" id="bsr-copy-btn" data-key="${map.key}"><a>Copy !bsr</a></li>
                     </ul>
                 </div>
             </div>
             <div class="my-2">
-                <button class="js-listen btn-small" onclick="listen(this)">listen</button>
+                <button class="js-listen btn-small listen-btn">listen</button>
             </div>
         </div>
     `);
+
+    $(".listen-btn").click(event => {
+        listen(event.currentTarget);
+    });
+
+    $("#bsr-copy-btn").click(event => {
+        const key = $(event.currentTarget).data("key");
+        copyTextToClipboard('!bsr ' + key);
+    });
+
+    $("#download-map").click(_ => {
+        downloadMap();
+    });
 }
 
 
@@ -506,7 +541,7 @@ function downloadMap() {
     // Create url and click link
     const url = URL.createObjectURL(data.blob);
     a.href = url;
-    a.download = `(${map.key}) - ${data.infos._songName}.zip`;
+    a.download = `${map.key} (${data.infos._songName} - ${data.infos._levelAuthorName}).zip`;
     a.click();
     URL.revokeObjectURL(url);
 }

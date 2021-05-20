@@ -53,20 +53,6 @@ function preview(key) {
 
 
 /**
- * Dismisses the preview modal
- */
-function dismissModal() {
-    modalVisible = false;
-
-    const modal = $("#preview-map");
-    modal.addClass("u-none");
-
-    const iframe = modal.find("> iframe");
-    iframe.attr("src", ``);
-}
-
-
-/**
  * Handles API Requests
  */
 class API {
@@ -269,3 +255,11 @@ class API {
 }
 
 
+module.exports = {
+    clean,
+    round,
+    bytesToSize,
+    convertDate,
+    preview,
+    API
+}

@@ -1,0 +1,24 @@
+{
+  "name": "deep-beat",
+  "version": "1.0.0",
+  "description": "Analyze custom beat saber maps without installing or playing them and see if they fit your playstyle and level.",
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "webpack": "^5.37.1",
+    "webpack-cli": "^4.7.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MindLaborDev/deep-beat.git"
+  },
+  "author": "Samuel Braun (MindLabor)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MindLaborDev/deep-beat/issues"
+  },
+  "homepage": "https://github.com/MindLaborDev/deep-beat#readme"
+}
