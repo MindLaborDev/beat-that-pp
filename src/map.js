@@ -294,13 +294,13 @@ function renderBasicMapInfos() {
         `<div class="tag tag--primary bg-purple-600 ml-1">Very High</div>`
     ];
     const baseJumps = data.mapData._notes.length * 0.015;
-    const lowJumps = Math.log2(histories.jumps.jumpsCount / baseJumps) + 1;
-    const jumpsRatingIndex = lowJumps < 0? 0 : lowJumps > ratings.length - 1 ? ratings.length - 1 : lowJumps;
+    const lowJumps = ~~(Math.log2(histories.jumps.jumpsCount / baseJumps) + 1);
+    const jumpsRatingIndex = lowJumps < 0 ? 0 : lowJumps > ratings.length - 1 ? ratings.length - 1 : lowJumps;
     const jumpsRating = ratings[jumpsRatingIndex];
 
     const baseVB = data.mapData._notes.length * 0.015;
-    const lowVB = Math.log2((histories.blockers.left.length + histories.blockers.right.length) / baseVB) + 1;
-    const VBRatingIndex = lowVB < 0? 0 : lowVB > ratings.length - 1 ? ratings.length - 1 : lowVB;
+    const lowVB = ~~(Math.log2((histories.blockers.left.length + histories.blockers.right.length) / baseVB) + 1);
+    const VBRatingIndex = lowVB < 0 ? 0 : lowVB > ratings.length - 1 ? ratings.length - 1 : lowVB;
     const VBRating = ratings[VBRatingIndex];
 
     $("#map-general-info-wrapper").html(`
