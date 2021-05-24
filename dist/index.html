@@ -16,10 +16,13 @@
             <h1 class="mb-1">Deep Beat</h1>
             <h6 class="font-light">A custom beatsaber map analyser</h6>
         </div>
-        <label>Beatmap Key</label>
-        <input id="key" type="text" placeholder="!bsr 13377"/>
+        <div id="key-input">
+            <label>Beatmap Key</label>
+            <input id="key" type="text" placeholder="!bsr 13377"/>
+        </div>
         <span id="error-msg" class="info u-none error"></span>
         <button id="generate-song-report" class="btn-primary animated mt-6">Analyse Map</button>
+        <button id="upload-file">Upload your own Beatmap</button>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script>

@@ -19,6 +19,7 @@ let chart;
 let analysedBeatmap;
 let historyMode = "nps";
 let histories = {};
+let key;
 const CHART_OPACITY = "66";
 $(document).ready(async function () {
 
@@ -30,39 +31,59 @@ $(document).ready(async function () {
         difficulty = +args[1];
     }
 
-    const key = args[0].substring(1);
+    key = args[0].substring(1);
     document.title = "Fetching Map Details...";
 
-    map = await API.getMapDetails(key);
-    if (map === 404)
-        return;
-    console.log(map);
+    if (key !== "upload") {
+        map = await API.getMapDetails(key);
+        if (map === 404)
+            return;
+        console.log(map);
+    } else {
+        $("#upload-section").removeClass("u-none");
+    }
 
-    document.title = `Deep Beat | ${map.name}`;
+    document.title = `Deep Beat | ${map?.name || "Analysing Beatmap..."}`;
 
     // Download map
-    progressElement = $("#progress");
-    progressStatusElement = $("#progress-status");
-    progressMessageElement = $("#progress-message");
-    progressWrapper = $(".progress");
-    progressWrapper.removeClass("not-loaded");
-    const zip = `https://beatsaver.com${map.directDownload}`;
-    const blob = await download(zip);
+    let zip;
+    let blob;
+    if (key !== "upload") {
+        progressElement = $("#progress");
+        progressStatusElement = $("#progress-status");
+        progressMessageElement = $("#progress-message");
+        progressWrapper = $(".progress");
+        progressWrapper.removeClass("not-loaded");
+        zip = `https://beatsaver.com${map.directDownload}`;
+        blob = await download(zip);
+        await main(blob, zip);
+    }
+
+    $("#generate-song-report").click(async () => {
+
+        const files = $("#file")[0].files;
+        if (files.length === 0)
+            return;
+
+        const file = files[0];
+        await main(file, file.name);
+    })
+})
+
+async function main(blob, zip) {
 
     data = await decodeZippedMap(blob, zip.endsWith(".audica"));
     console.log(data);
 
-    console.log(data.infos._beatsPerMinute)
     analysedBeatmap = new BeatMap(data.mapData, data.infos._beatsPerMinute);
-    //console.log(analysedBeatmap);
 
     // Show song informations
     renderSongHero({
-        cover: `https://beatsaver.com${map.coverURL}`,
+        cover: `https://beatsaver.com${map?.coverURL}`,
         title: data.infos._songName,
-        mapper: map.uploader.username,
-        likes: map.stats.upVotes,
-        dislikes: map.stats.downVotes,
+        mapper: map?.uploader.username,
+        likes: map?.stats.upVotes,
+        dislikes: map?.stats.downVotes,
         oneclick: `beatsaver://${key}`,
         zip
     })
@@ -74,7 +95,7 @@ $(document).ready(async function () {
     setupCharts();
     toggleTrend(historyMode);
     addToggleTrendListener();
-})
+}
 
 
 function addToggleTrendListener() {
@@ -273,8 +294,9 @@ function analyseMapStructure() {
 
 function renderBasicMapInfos() {
 
+    const reqs = data.maps[difficulty]._customData?._requirements || [];
     const reqHTML = [];
-    for (const req of data.maps[difficulty]._customData._requirements) {
+    for (const req of reqs) {
         const link = modLinks[req] ? `href="${modLinks[req]}" target="_blank"` : "";
         reqHTML.push(`<a ${link}>${req}</a>`);
     }
@@ -283,7 +305,7 @@ function renderBasicMapInfos() {
     const min = ~~(~~data.audio.duration / 60);
     const sec = ~~data.audio.duration % 60;
     let starData;
-    if (map._diffs != null)
+    if (map && map._diffs != null)
         starData = map._diffs.find(d => d.diff === difficulty);
 
 
@@ -309,9 +331,10 @@ function renderBasicMapInfos() {
 
         <div id="map-general-infos">
             <div>
+                ${map?.uploader.username ? `
                 <div class="u-text-ellipsis">
-                    <span class="key-1 u-text-ellipsis">Uploader</span><span class="value-1">${map.uploader.username}</span>
-                </div>
+                    <span class="key-1 u-text-ellipsis">Uploader</span><span class="value-1">${map?.uploader.username}</span>
+                </div>` : ""}
                 <div>
                     <span class="key-1 u-text-ellipsis">Duration</span><span class="value-1">${min}min ${sec}s</span>
                 </div>
@@ -470,7 +493,7 @@ async function selectDifficulty(difficultyRank) {
 function renderDifficultyMenu(beatmap) {
     const html = beatmap._difficultyBeatmaps.reduce((acc, cv) => {
         const selected = difficulty === cv._difficultyRank ? `class="selected"` : "";
-        const d = cv._customData._difficultyLabel || difficultyDisplayMap[cv._difficulty] || cv._difficulty;
+        const d = cv._customData?._difficultyLabel || difficultyDisplayMap[cv._difficulty] || cv._difficulty;
         return acc + `<li data-did="${cv._difficultyRank}" ${selected}><div class="tab-item-content">${d}</div></li>`
     }, "");
 
@@ -490,37 +513,45 @@ function formatSecondsToTime(sec) {
     return `${min < 10 ? "0" + min : min}:${s < 10 ? "0" + s : s}`;
 }
 
-function renderSongHero(data) {
+function renderSongHero(renderData) {
     $("#song-hero").html(`
         <div class="song-img">
-            <img class="u-circle u-center" src="${data.cover}" />
+            <img id="cover-img" class="u-circle u-center" />
             <button class="js-listen-mobile btn-small u-center listen-btn">listen</button>
         </div>
         <div>
-            <h4>${data.title}</h4>
-            <p class="tooltip tooltip--bottom" data-tooltip="${convertDate(map.uploaded)}" style="width: fit-content;">Uploaded by ${data.mapper}</p>
+            <h4>${renderData.title}</h4>
+            <p class="tooltip tooltip--bottom" data-tooltip="${convertDate(map?.uploaded)}" style="width: fit-content;">Uploaded by ${renderData.mapper || "you"}</p>
             <span>
-                ${data.likes} <i class="fas fa-heart"></i> &nbsp;&nbsp;
-                ${data.dislikes} <i class="fas fa-heart-broken"></i>
+                ${renderData.likes || "-"} <i class="fas fa-heart"></i> &nbsp;&nbsp;
+                ${renderData.dislikes || "-"} <i class="fas fa-heart-broken"></i>
             </span>
         </div>
         <div class="song-footer" id="install-btn-group">
-            <div class="my-2">
-            <div class="list-dropdown">
-                <div class="btn-group">
-                    <button class="btn-primary" onclick="window.location.href = '${data.oneclick}';">Install</button>
-                    <button class="btn-primary btn-small btn-dropdown"><i class="fa fa-wrapper fa-caret-down" aria-hidden="true"></i></button>
-                    <ul class="menu">
-                        <li class="menu-item" id="download-map"><a>Download Map</a></li>
-                        <li class="menu-item" id="bsr-copy-btn" data-key="${map.key}"><a>Copy !bsr</a></li>
-                    </ul>
-                </div>
-            </div>
+            ${key === "upload" ? "" :
+            `<div class="my-2">
+                <div class="list-dropdown">
+                    <div class="btn-group">
+                        <button class="btn-primary" onclick="window.location.href = '${renderData.oneclick}';">Install</button>
+                        <button class="btn-primary btn-small btn-dropdown"><i class="fa fa-wrapper fa-caret-down" aria-hidden="true"></i></button>
+                        <ul class="menu">
+                            <li class="menu-item" id="download-map"><a>Download Map</a></li>
+                            ${key === "upload" ? "" : `<li class="menu-item" id="bsr-copy-btn" data-key="${key}"><a>Copy !bsr</a></li>`}
+                        </ul>
+                    </div>
+                </div>`}
             <div class="my-2">
                 <button class="js-listen btn-small listen-btn">listen</button>
             </div>
         </div>
     `);
+
+    if (key === "upload") {
+        console.log(data);
+        $("#cover-img")[0].src = URL.createObjectURL(data.cover);
+    } else {
+        $("#cover-img")[0].src = renderData.cover;
+    }
 
     $(".listen-btn").click(event => {
         listen(event.currentTarget);
@@ -538,6 +569,9 @@ function renderSongHero(data) {
 
 
 function setStatus(message, percentage) {
+    if (key === "upload")
+        return;
+
     progressElement.css("width", percentage + "%");
     progressStatusElement.text(percentage + "%");
     progressMessageElement.text(message);
@@ -558,7 +592,7 @@ function downloadMap() {
     // Create url and click link
     const url = URL.createObjectURL(data.blob);
     a.href = url;
-    a.download = `${map.key} (${data.infos._songName} - ${data.infos._levelAuthorName}).zip`;
+    a.download = `${key} (${data.infos._songName} - ${data.infos._levelAuthorName}).zip`;
     a.click();
     URL.revokeObjectURL(url);
 }
@@ -607,7 +641,9 @@ async function decodeZippedMap(blob, audica = false) {
         const mapData = JSON.parse(mapString);
         setStatus(`Analysing your map...`, 94);
 
-        audio = await API.getAudioBlob(zipBlob);
+        let d = await API.getAudioBlob(zipBlob);
+        audio = d.audio;
+        let cover = d.cover;
         setStatus(`Analysing your map...`, 100);
 
         // Split bombs and notes
@@ -620,6 +656,7 @@ async function decodeZippedMap(blob, audica = false) {
             beatmap,
             mapData,
             audio,
+            cover,
             blob
         }
     }

@@ -154,6 +154,16 @@ class API {
     }
 
 
+    static async getCoverBlob(zipBlob) {
+        const infoFile = zipBlob.file("info.dat") || zipBlob.file("Info.dat")
+        const infoString = await infoFile.async("string")
+        const infos = JSON.parse(infoString)
+
+
+        return blob;
+    }
+
+
     /**
      * Converts a zipBlob from jsZip to an Audio
      */
@@ -163,27 +173,7 @@ class API {
             audio.volume = .2;
 
             if (audica) {
-                const descFile = await zipBlob.file("song.desc").async("string")
-                const description = JSON.parse(descFile)
-                const filename = description.moggSong.substring(0, description.moggSong.length - 4)
-                const bytes = await zipBlob.file(filename).async("uint8array")
-                let s = Array.from(bytes.slice(4, 8));
-                s = (s = s.map(e => {
-                    let t = e.toString(16);
-                    return 1 == t.length && (t = "0" + t), t
-                }
-                )).reverse(), s = parseInt(s.join(""), 16);
-
-                const chunk = bytes.slice(s, bytes.size)
-                const blob = new Blob([chunk], {
-                    type: "application/ogg"
-                })
-
-                audio.src = URL.createObjectURL(blob);
-                audio.currentTime = description.previewStartSeconds;
-                audio.onloadedmetadata = function () {
-                    resolve(audio);
-                }
+                // No support
             } else {
                 const infoFile = zipBlob.file("info.dat") || zipBlob.file("Info.dat")
                 const infoString = await infoFile.async("string")
@@ -191,11 +181,16 @@ class API {
 
                 const filename = infos._songFilename
                 const blob = await zipBlob.file(filename).async("blob")
+                const cfilename = infos._coverImageFilename
+                const cblob = await zipBlob.file(cfilename).async("blob")
 
                 audio.src = URL.createObjectURL(blob);
                 audio.currentTime = infos._previewStartTime;
                 audio.onloadedmetadata = function () {
-                    resolve(audio);
+                    resolve({
+                        audio,
+                        cover: cblob
+                    });
                 }
             }
         });

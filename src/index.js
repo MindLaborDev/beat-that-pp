@@ -16,11 +16,14 @@ $(document).ready(function ()
         }
     });
 
+    $("#upload-file").click(() => {
+        window.location.href = "/map#upload";
+    });
 });
 
 async function onAnalyseMap(input) {
-
     $("#error-msg").addClass("u-none");
+
     let key = input.val().trim();
     key = key.replace(/!bsr\s*/g, "")
     key = key.replace(/https?:\/\//g, "")
