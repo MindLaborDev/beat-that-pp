@@ -273,18 +273,35 @@ function analyseMapStructure() {
 
 function renderBasicMapInfos() {
 
-    let reqHTML = [];
+    const reqHTML = [];
     for (const req of data.maps[difficulty]._customData._requirements) {
         const link = modLinks[req] ? `href="${modLinks[req]}" target="_blank"` : "";
         reqHTML.push(`<a ${link}>${req}</a>`);
     }
-    let requires = reqHTML.length > 0 ? `Requires <span>${reqHTML.join(", ")}</span><br />` : "";
+    const requires = reqHTML.length > 0 ? `Requires <span>${reqHTML.join(", ")}</span><br />` : "";
 
-    let min = ~~(~~data.audio.duration / 60);
-    let sec = ~~data.audio.duration % 60;
+    const min = ~~(~~data.audio.duration / 60);
+    const sec = ~~data.audio.duration % 60;
     let starData;
     if (map._diffs != null)
         starData = map._diffs.find(d => d.diff === difficulty);
+
+
+    const ratings = [
+        `<div class="tag tag--primary bg-green-500 ml-1">Low</div>`,
+        `<div class="tag tag--primary bg-yellow-400 ml-1">Moderate</div>`,
+        `<div class="tag tag--primary bg-red-600 ml-1">High</div>`,
+        `<div class="tag tag--primary bg-purple-600 ml-1">Very High</div>`
+    ];
+    const baseJumps = data.mapData._notes.length * 0.015;
+    const lowJumps = Math.log2(histories.jumps.jumpsCount / baseJumps) + 1;
+    const jumpsRatingIndex = lowJumps < 0? 0 : lowJumps > ratings.length - 1 ? ratings.length - 1 : lowJumps;
+    const jumpsRating = ratings[jumpsRatingIndex];
+
+    const baseVB = data.mapData._notes.length * 0.015;
+    const lowVB = Math.log2((histories.blockers.left.length + histories.blockers.right.length) / baseVB) + 1;
+    const VBRatingIndex = lowVB < 0? 0 : lowVB > ratings.length - 1 ? ratings.length - 1 : lowVB;
+    const VBRating = ratings[VBRatingIndex];
 
     $("#map-general-info-wrapper").html(`
         <!-- https://cdn.wes.cloud/beatstar/bssb/v2-all.json -->
@@ -322,10 +339,10 @@ function renderBasicMapInfos() {
                     <span class="key-2 u-text-ellipsis">&nbsp;</span>
                 </div>
                 <div>
-                    <span class="key-3 u-text-ellipsis">Estimated jumps</span><span class="value-1" id="value-jumps">${histories.jumps.jumpsCount}</span>
+                    <span class="key-3 u-text-ellipsis">Estimated jumps</span><span class="value-1" id="value-jumps">${histories.jumps.jumpsCount}${jumpsRating}</span>
                 </div>
                 <div>
-                    <span class="key-3 u-text-ellipsis">Vision blockers</span><span class="value-1" id="value-blockers">${histories.blockers.left.length + histories.blockers.right.length}</span>
+                    <span class="key-3 u-text-ellipsis">Vision blockers</span><span class="value-1" id="value-blockers">${histories.blockers.left.length + histories.blockers.right.length}${VBRating}</span>
                 </div>
             </div>
             <div>
