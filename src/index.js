@@ -2,8 +2,7 @@
 
 const { API } = require("./helper");
 
-$(document).ready(function () 
-{
+$(document).ready(function () {
     const input = $("#key");
     input.on("input", () => {
         input.removeClass("text-danger input-error");

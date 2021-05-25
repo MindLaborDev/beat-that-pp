@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,16 +12,18 @@
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
         integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
 </head>
+
 <body>
 
     <div class="top-element">
         <div class="mb-6">
-            <h1 class="mb-1">Deep Beat</h1>
+            <h1 class="mb-1">Deep Beat<div class="tag tag--primary beta-tag ml-2">BETA</div>
+            </h1>
             <h6 class="font-light">A custom beatsaber map analyser</h6>
         </div>
         <div id="key-input">
             <label>Beatmap Key</label>
-            <input id="key" type="text" placeholder="!bsr 13377"/>
+            <input id="key" type="text" placeholder="!bsr 13377" />
         </div>
         <span id="error-msg" class="info u-none error"></span>
         <button id="generate-song-report" class="btn-primary animated mt-6">Analyse Map</button>
@@ -29,11 +32,14 @@
 
     <footer class="footer">
         <p class="subtitle">Made with ❤️ by
-        <a href="https://github.com/MindLaborDev/" rel="noopener noreferrer"><span id="social-link" class="white"><i class="fab fa-github"></i> <span>MindLabor</span></span></a></p>
+            <a href="https://github.com/MindLaborDev/" rel="noopener noreferrer"><span id="social-link" class="white"><i
+                        class="fab fa-github"></i> <span>MindLabor</span></span></a>
+        </p>
     </footer>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script>
     <script src="vendor/jszip.min.js"></script>
     <script src="home.js"></script>
 </body>
+
 </html>

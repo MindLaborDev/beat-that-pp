@@ -11,7 +11,7 @@ function clean(string) {
 /**
  * Round a number to 2 decimal points
  */
-function round(number, n=2) {
+function round(number, n = 2) {
     return ~~(number * Math.pow(10, n)) / Math.pow(10, n);
 }
 
@@ -29,7 +29,7 @@ function bytesToSize(bytes) {
 
 function convertDate(string) {
     const date = new Date(string);
-    const months = ["Jan", "Feb", "Mar","Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     return date.getDate() + " " + months[date.getMonth()] + " " + date.getFullYear();
 }
 
@@ -140,12 +140,12 @@ class API {
     /**
      * Fetches data about a map
      */
-    static async getMapDetails(key, include_stars=true) {
+    static async getMapDetails(key, include_stars = true) {
         const mapUrl = `https://beatsaver.com/api/maps/detail/${key}`;
         const data = await API.get(mapUrl);
         if (data === 404)
             return;
-        
+
         if (include_stars) {
             const diffs = await API.get(`https://deep-beat.000webhostapp.com/?hash=${data.hash}`);
             data._diffs = JSON.parse(diffs)
