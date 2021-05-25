@@ -20,6 +20,7 @@ let analysedBeatmap;
 let historyMode = "nps";
 let histories = {};
 let key;
+let analysing = false;
 const CHART_OPACITY = "66";
 $(document).ready(async function () {
 
@@ -60,22 +61,33 @@ $(document).ready(async function () {
     }
 
     $("#generate-song-report").click(async () => {
+        if (analysing) return;
+        analysing = true;
 
         const files = $("#file")[0].files;
         if (files.length === 0)
             return;
 
+        $("#generate-song-report").addClass("animated loading hide-text");
+
         const file = files[0];
         await main(file, file.name);
+        $("#generate-song-report").removeClass("animated loading hide-text");
     })
 })
 
 async function main(blob, zip) {
 
+    if (!zip.endsWith(".zip")) {
+        $("#generate-song-report").removeClass("animated loading hide-text");
+        return;
+    }
+
     data = await decodeZippedMap(blob, zip.endsWith(".audica"));
     console.log(data);
-
     analysedBeatmap = new BeatMap(data.mapData, data.infos._beatsPerMinute);
+
+    $("#upload-section").addClass("u-none");
 
     // Show song informations
     renderSongHero({
