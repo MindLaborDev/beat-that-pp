@@ -31,7 +31,7 @@
         <button id="generate-song-report" class="btn-primary animated mt-6">Analyse Map</button>
     </div>
 
-    <div class="top-element-map">
+    <div id="analysis-content-wrapper" class="top-element-map u-none">
         <div id="player" class="pt-16"></div>
         <div class="pb-8 pt-8">
             <div id="song-hero"></div>
@@ -45,7 +45,7 @@
         </div>
         <div class="tab-container tabs-center not-loaded" id="difficulty-menu"></div>
         <div id="map-general-info-wrapper"></div>
-        <div class="mt-8 pb-32 u-none" id="chart-wrapper">
+        <div class="mt-8 pb-16 u-none" id="chart-wrapper">
             <div class="tab-container tabs-center" id="stats-menu">
                 <ul>
                     <li id="graph-toggle-nps" class="selected">
@@ -65,6 +65,11 @@
             <canvas id="chart"></canvas>
         </div>
     </div>
+
+    <footer class="footer">
+        <p class="subtitle">Made with ❤️ by
+        <a href="https://github.com/MindLaborDev/" target="_blank" rel="noopener noreferrer"><span id="social-link" class="white"><i class="fab fa-github"></i> <span>MindLabor</span></span></a></p>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.min.js"></script>

@@ -36,6 +36,7 @@ $(document).ready(async function () {
     document.title = "Fetching Map Details...";
 
     if (key !== "upload") {
+        $("#analysis-content-wrapper").removeClass("u-none");
         map = await API.getMapDetails(key);
         if (map === 404)
             return;
@@ -62,12 +63,15 @@ $(document).ready(async function () {
 
     $("#generate-song-report").click(async () => {
         if (analysing) return;
-        analysing = true;
 
+        $("#file").removeClass("input-error");
         const files = $("#file")[0].files;
-        if (files.length === 0)
+        if (files.length === 0) {
+            $("#file").addClass("input-error");
             return;
+        }
 
+        analysing = true;
         $("#generate-song-report").addClass("animated loading hide-text");
 
         const file = files[0];
@@ -88,6 +92,7 @@ async function main(blob, zip) {
     analysedBeatmap = new BeatMap(data.mapData, data.infos._beatsPerMinute);
 
     $("#upload-section").addClass("u-none");
+    $("#analysis-content-wrapper").removeClass("u-none");
 
     // Show song informations
     renderSongHero({

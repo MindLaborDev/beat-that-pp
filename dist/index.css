@@ -22,6 +22,7 @@
     -webkit-transition: padding-top 0.3s;
     -o-transition: padding-top 0.3s;
     transition: padding-top 0.3s;
+    height: calc(100vh - 20rem);
 }
 
 .top-element-map {
@@ -31,6 +32,7 @@
     -webkit-transition: padding-top 0.3s;
     -o-transition: padding-top 0.3s;
     transition: padding-top 0.3s;
+    min-height: calc(100vh - 20rem);
 }
 
 #song-hero {
@@ -156,6 +158,28 @@
 .js-listen-mobile {
     margin-top: 1rem;
     display: none;
+}
+
+footer .footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 4rem; 
+    padding: 3rem 0;
+}
+
+#social-link {
+    cursor: pointer;
+    padding-left: 4px;
+    font-weight: 400;
+}
+
+#social-link:hover > span {
+    text-decoration: underline;
+}
+
+#social-link > * {
+    pointer-events: none;
 }
 
 @media only screen and (max-width: 1200px) {
