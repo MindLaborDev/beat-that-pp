@@ -18,6 +18,7 @@ $(document).ready(function () {
     $("#upload-file").click(() => {
         window.location.href = "/map#upload";
     });
+
 });
 
 async function onAnalyseMap(input) {

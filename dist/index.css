@@ -196,6 +196,75 @@ footer .footer {
     color: #009432;
 }
 
+.toast {
+    position: fixed;
+    min-width: 250px;
+    width: fit-content;
+    max-width: 50%;
+    margin-left: -125px;
+    text-align: center;
+    left: 50%;
+    top: 30px;
+    padding: 0.75rem 3.5rem 0.75rem 2.25rem;
+    opacity: 0;
+}
+
+.toast.show {
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    opacity: 1;
+}
+
+.toast.persist-show {
+    opacity: 1 !important;
+    -webkit-animation: none;
+    animation: none;
+}
+
+@-webkit-keyframes fadein {
+    from {
+        top: 0;
+        opacity: 0;
+    }
+    to {
+        top: 30px;
+        opacity: 1;
+    }
+}
+
+@keyframes fadein {
+    from {
+        top: 0;
+        opacity: 0;
+    }
+    to {
+        top: 30px;
+        opacity: 1;
+    }
+}
+
+@-webkit-keyframes fadeout {
+    from {
+        top: 30px;
+        opacity: 1;
+    }
+    to {
+        top: 0;
+        opacity: 0;
+    }
+}
+
+@keyframes fadeout {
+    from {
+        top: 30px;
+        opacity: 1;
+    }
+    to {
+        top: 0;
+        opacity: 0;
+    }
+}
+
 @media only screen and (max-width: 1200px) {
     .top-element {
         width: 70%;

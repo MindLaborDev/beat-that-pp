@@ -4,6 +4,7 @@ const {
     round,
     bytesToSize,
     convertDate,
+    showToast,
     API
 } = require("./helper");
 
@@ -38,8 +39,10 @@ $(document).ready(async function () {
     if (key !== "upload") {
         $("#analysis-content-wrapper").removeClass("u-none");
         map = await API.getMapDetails(key);
-        if (map === 404)
+        if (map === 404 || !map) {
+            showToast("I couldn't find this map!", true);
             return;
+        }
         console.log(map);
     } else {
         $("#upload-section").removeClass("u-none");
@@ -622,8 +625,6 @@ async function decodeZippedMap(blob, audica = false) {
     const zipBlob = await zip.loadAsync(blob);
 
     if (audica) {
-        const descFile = await zipBlob.file("song.desc").async("string");
-        const description = JSON.parse(descFile);
         throw "Audica files are not supported yet";
     } else {
         const infoFile = zipBlob.file("info.dat") || zipBlob.file("Info.dat");

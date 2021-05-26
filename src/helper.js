@@ -1,4 +1,10 @@
 
+$(document).ready(function () {
+    $("#toast-close").click(() => {
+        $(".toast").removeClass("show persist-show");
+    });
+});
+
 
 /**
  * Strip html tags from string
@@ -34,22 +40,23 @@ function convertDate(string) {
 }
 
 
-/**
- * Start preview of a map
- */
-let modalVisible = false;
-function preview(key) {
-    const modal = $("#preview-map");
-    const iframe = modal.find("> iframe");
-    iframe.attr("src", `https://skystudioapps.com/bs-viewer/?id=${key}`);
-    modalVisible = true;
+let interval;
+function showToast(msg, persist) {
+    $("#toast-msg").text(msg)
+    $(".toast").addClass("show");
 
-    // Show modal after loading (i know there is a better solution - but lets keep it simple, aay)
-    setTimeout(() => {
-        if (modalVisible)
-            modal.removeClass("u-none");
-    }, 1500);
+    if (interval)
+        clearInterval(interval)
+
+    if (!persist) {
+        interval = setInterval(() => {
+            $(".toast").removeClass("show persist-show");
+        }, 3000);
+    } else {
+        $(".toast").addClass("persist-show");
+    }
 }
+
 
 
 /**
@@ -154,16 +161,6 @@ class API {
     }
 
 
-    static async getCoverBlob(zipBlob) {
-        const infoFile = zipBlob.file("info.dat") || zipBlob.file("Info.dat")
-        const infoString = await infoFile.async("string")
-        const infos = JSON.parse(infoString)
-
-
-        return blob;
-    }
-
-
     /**
      * Converts a zipBlob from jsZip to an Audio
      */
@@ -173,7 +170,7 @@ class API {
             audio.volume = .2;
 
             if (audica) {
-                // No support
+                throw "Audica files are not supported yet";
             } else {
                 const infoFile = zipBlob.file("info.dat") || zipBlob.file("Info.dat")
                 const infoString = await infoFile.async("string")
@@ -255,6 +252,6 @@ module.exports = {
     round,
     bytesToSize,
     convertDate,
-    preview,
+    showToast,
     API
 }
