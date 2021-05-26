@@ -22,5 +22,5 @@ There are two pages, the index.js page and the map.js page. The index page conta
 
 #### Development
  * Run `npm install`
- * Run `http-server` (assuming that you have installed it)
+ * Run `cd dist && http-server` (assuming that you have installed it)
  * Run `npx webpack` in another terminal session
