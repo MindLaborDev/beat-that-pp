@@ -40,7 +40,9 @@ $(document).ready(async function () {
         $("#analysis-content-wrapper").removeClass("u-none");
         map = await API.getMapDetails(key);
         if (map === 404 || !map) {
-            showToast("I couldn't find this map!", true);
+            showToast("I couldn't find this map!", {
+                persist: true
+            });
             return;
         }
         console.log(map);
@@ -80,6 +82,7 @@ $(document).ready(async function () {
         const file = files[0];
         await main(file, file.name);
         $("#generate-song-report").removeClass("animated loading hide-text");
+        analysing = false;
     })
 })
 
@@ -625,9 +628,13 @@ async function decodeZippedMap(blob, audica = false) {
     const zipBlob = await zip.loadAsync(blob);
 
     if (audica) {
-        throw "Audica files are not supported yet";
+        showToast("Audica files are not supported!");
     } else {
         const infoFile = zipBlob.file("info.dat") || zipBlob.file("Info.dat");
+        if (infoFile == null) {
+            showToast("Map has an invalid format!");
+            throw "Map has an invalid format! (No Info.dat found)";
+        }
         const infoString = await infoFile.async("string");
         const infos = JSON.parse(infoString);
         setStatus(`Analysing your map...`, 92);
@@ -655,6 +662,10 @@ async function decodeZippedMap(blob, audica = false) {
         }
 
         const mapFile = zipBlob.file(maps[difficulty]._beatmapFilename);
+        if (mapFile == null) {
+            showToast("Map has an invalid format!");
+            throw `Map has an invalid format! (No ${maps[difficulty]._beatmapFilename} found)`;
+        }
         const mapString = await mapFile.async("string");
         const mapData = JSON.parse(mapString);
         setStatus(`Analysing your map...`, 94);
@@ -770,11 +781,16 @@ function fallbackCopyTextToClipboard(text) {
     textArea.select();
 
     try {
-        var successful = document.execCommand('copy');
-        var msg = successful ? 'successful' : 'unsuccessful';
-        console.log('Fallback: Copying text command was ' + msg);
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showToast(`Copied ${text}`, {
+                color: "success"
+            });
+        } else {
+            showToast(`Could not copy ${text}`);
+        }
     } catch (err) {
-        console.error('Fallback: Oops, unable to copy', err);
+        showToast(`Could not copy ${text}`);
     }
 
     document.body.removeChild(textArea);
@@ -787,9 +803,11 @@ function copyTextToClipboard(text) {
         return;
     }
     navigator.clipboard.writeText(text).then(function () {
-        console.log('Async: Copying to clipboard was successful!');
+        showToast(`Copied ${text}`, {
+            color: "success"
+        });
     }, function (err) {
-        console.error('Async: Could not copy text: ', err);
+        showToast(`Could not copy ${text}`);
     });
 }
 

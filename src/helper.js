@@ -41,14 +41,17 @@ function convertDate(string) {
 
 
 let interval;
-function showToast(msg, persist) {
+function showToast(msg, options) {
     $("#toast-msg").text(msg)
-    $(".toast").addClass("show");
+    $(".toast")
+    .removeClass((_, className) => (className.match(/(^|\s)toast--\S+/g) || []).join(' '))
+    .addClass(options.color ? "toast--" + options.color : "toast--danger")
+    .addClass("show");
 
     if (interval)
         clearInterval(interval)
 
-    if (!persist) {
+    if (!options.persist) {
         interval = setInterval(() => {
             $(".toast").removeClass("show persist-show");
         }, 3000);
@@ -170,7 +173,7 @@ class API {
             audio.volume = .2;
 
             if (audica) {
-                throw "Audica files are not supported yet";
+                showToast("Audica files are not supported!");
             } else {
                 const infoFile = zipBlob.file("info.dat") || zipBlob.file("Info.dat")
                 const infoString = await infoFile.async("string")
