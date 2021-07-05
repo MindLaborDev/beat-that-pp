@@ -1,7 +1,5 @@
 # Deep Beat
 
-
-### Video Demo:  https://youtu.be/Be960kdNk9Y
 ### Description:
 Deep Beat analyses many characteristics of BeatSaber Maps that give a better understanding of the playstyle, difficulty and flow.
 
@@ -24,3 +22,7 @@ There are two pages, the index.js page and the map.js page. The index page conta
  * Run `npm install`
  * Run `cd dist && http-server` (assuming that you have installed it)
  * Run `npx webpack` in another terminal session
+
+<hr>
+
+[![man hours](https://img.shields.io/endpoint?url=https%3A%2F%2Fmh.jessemillar.com%2Fhours%3Frepo%3Dhttps%3A%2F%2Fgithub.com%2FMindLaborDev%2Fdeep-beat.git)](https://jessemillar.com/r/man-hours)
