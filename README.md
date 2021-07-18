@@ -52,7 +52,7 @@ https://deep-beat.vercel.app/map#upload
 <br>&nbsp;<br>
 <div align="center">
     <h2>Preview</h2>
-    <a href="https://deep-beat.vercel.app/">
+    <a href="https://deep-beat.vercel.app/map#13377">
         <img src="https://raw.githubusercontent.com/MindLaborDev/deep-beat/main/demo/preview.png" width="512" style="border-radius: 15px;">
     </a>
 </div>
