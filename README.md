@@ -1,11 +1,16 @@
+
+<br>&nbsp;<br>
 <div align="center">
-    <img src="https://raw.githubusercontent.com/MindLaborDev/deep-beat/main/demo/preview.png" width="128" style="border-radius: 15px;">
+    <a href="https://deep-beat.vercel.app/">
+        <img src="https://raw.githubusercontent.com/MindLaborDev/deep-beat/main/demo/preview2.png" width="512" style="border-radius: 15px;">
+    </a>
     <h2>Deep Beat</h2>
     <p align="center">
         <p>Analyze custom BeatSaber maps without installing or playing them and see if they fit your playstyle, level and flow</p>
     </p>
 </div>
 <br>&nbsp;<br>
+
 
 ## Features
  * You can analyse other maps by entering their bsr code
@@ -14,6 +19,7 @@
  * You can install, download and listen to the map in your browser
  * Deep Beat estimates the frequency of some patterns like jumps and vision blockers and gives it a grade from low to very high
  * You can also look how the nps, speed, wrist-heavyness and complexity develops over time
+
 
 <br>&nbsp;<br>
 ## Demo Links
@@ -24,7 +30,8 @@ https://deep-beat.vercel.app/map#13377
 https://deep-beat.vercel.app/map#upload
 
 
-### Development
+<br>&nbsp;<br>
+## Development
  * Run `npm install`
  * Run `cd dist && http-server` (assuming that you have installed http-server)
  * Run `npx webpack` in another terminal session
