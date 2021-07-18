@@ -1,9 +1,15 @@
-
+<div align="center">
+    <img src="https://github.com/MindLabor/Skadi/raw/master/fav.png" height="128" style="border-radius: 15px;">
+    <h2>Deep Beat</h2>
+    <p align="center">
+        <p>Analyze custom BeatSaber maps without installing or playing them and see if they fit your playstyle, level and flow</p>
+    </p>
+</div>
 <br>&nbsp;<br>
-# Deep Beat
 
-Analyze custom BeatSaber maps without installing or playing them and see if they fit your playstyle, level and flow.
- * You can also analyse your own maps by uploading them
+## Features
+ * You can analyse other maps by entering their bsr code
+ * You can analyse your own maps by uploading them
  * Deep Beat provides you with general information about the map like uploader, duration, stars, nps, njs, etc...
  * You can install, download and listen to the map in your browser
  * Deep Beat estimates the frequency of some patterns like jumps and vision blockers and gives it a grade from low to very high
