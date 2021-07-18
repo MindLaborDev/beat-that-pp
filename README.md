@@ -12,17 +12,24 @@
 <br>&nbsp;<br>
 
 
-## Features
- * You can analyse other maps by entering their bsr code
- * You can analyse your own maps by uploading them
- * Deep Beat provides you with general information about the map like uploader, duration, stars, nps, njs, etc...
- * You can install, download and listen to the map in your browser
- * Deep Beat estimates the frequency of some patterns like jumps and vision blockers and gives it a grade from low to very high
- * You can also look how the nps, speed, wrist-heavyness and complexity develops over time
+<div align="center">
+    <h2>Features</h2>
+</div>
+
+
+* You can analyse other maps by entering their bsr code
+* You can analyse your own maps by uploading them
+* Deep Beat provides you with general information about the map like uploader, duration, stars, nps, njs, etc...
+* You can install, download and listen to the map in your browser
+* Deep Beat estimates the frequency of some patterns like jumps and vision blockers and gives it a grade from low to very high
+* You can also look how the nps, speed, wrist-heavyness and complexity develops over time
 
 
 <br>&nbsp;<br>
-## Demo Links
+<div align="center">
+    <h2>Demo Links</h2>
+</div>
+
 https://deep-beat.vercel.app/
 
 https://deep-beat.vercel.app/map#13377
@@ -31,10 +38,24 @@ https://deep-beat.vercel.app/map#upload
 
 
 <br>&nbsp;<br>
-## Development
- * Run `npm install`
- * Run `cd dist && http-server` (assuming that you have installed http-server)
- * Run `npx webpack` in another terminal session
+
+<div align="center">
+    <h2>Development</h2>
+</div>
+
+
+* Run `npm install`
+* Run `cd dist && http-server` (assuming that you have installed http-server)
+* Run `npx webpack` in another terminal session
+
+
+<br>&nbsp;<br>
+<div align="center">
+    <h2>Preview</h2>
+    <a href="https://deep-beat.vercel.app/">
+        <img src="https://raw.githubusercontent.com/MindLaborDev/deep-beat/main/demo/preview.png" width="512" style="border-radius: 15px;">
+    </a>
+</div>
 
 <br>&nbsp;<br>
 <hr>
