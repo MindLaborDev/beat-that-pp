@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://github.com/MindLabor/Skadi/raw/master/fav.png" height="128" style="border-radius: 15px;">
+    <img src="https://raw.githubusercontent.com/MindLaborDev/deep-beat/main/demo/preview.png" width="128" style="border-radius: 15px;">
     <h2>Deep Beat</h2>
     <p align="center">
         <p>Analyze custom BeatSaber maps without installing or playing them and see if they fit your playstyle, level and flow</p>
