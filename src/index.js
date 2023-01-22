@@ -3,7 +3,6 @@
 const { API } = require("./helper");
 
 $(document).ready(function () {
-    fetch("https://skillsaber.vercel.app/api/player?id=76561198436848521").then(console.log);
     const input = $("#key");
     input.on("input", () => {
         input.removeClass("text-danger input-error");
